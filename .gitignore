@@ -1,7 +1,8 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
+# Dependencies
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Expo
 .expo/
@@ -9,7 +10,6 @@ dist/
 web-build/
 
 # Native
-.kotlin/
 *.orig.*
 *.jks
 *.p8
@@ -31,6 +31,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
@@ -40,15 +41,12 @@ yarn-error.*
 .idea/
 *.swp
 *.swo
+*~
 
 # OS generated files
 Thumbs.db
 ehthumbs.db
 Desktop.ini
-
-# Temporary files
-*.tmp
-*.temp
 
 # Logs
 logs
@@ -62,6 +60,7 @@ pids
 
 # Coverage directory used by tools like istanbul
 coverage/
+*.lcov
 
 # nyc test coverage
 .nyc_output
@@ -94,23 +93,125 @@ jspm_packages/
 .cache
 .parcel-cache
 
-# next.js build output
+# Next.js build output
 .next
 
-# nuxt.js build output
+# Nuxt.js build / generate output
 .nuxt
+dist
 
-# vuepress build output
-.vuepress/dist
+# Gatsby files
+.cache/
+public
 
-# Serverless directories
-.serverless
+# Storybook build outputs
+.out
+.storybook-out
 
-# FuseBox cache
-.fusebox/
+# Temporary folders
+tmp/
+temp/
 
-# DynamoDB Local files
-.dynamodb/
+# React Native specific
+# Bundle artifacts
+*.jsbundle
 
-# TernJS port file
-.tern-port
+# CocoaPods
+/ios/Pods/
+
+# Android
+/android/app/build/
+/android/build/
+/android/gradle/
+/android/local.properties
+/android/.gradle/
+/android/captures/
+/android/gradlew
+/android/gradlew.bat
+/android/local.properties
+/android/.idea/workspace.xml
+/android/.idea/tasks.xml
+/android/.idea/gradle.xml
+/android/.idea/assetWizardSettings.xml
+/android/.idea/dictionaries
+/android/.idea/libraries
+/android/.idea/jarRepositories.xml
+
+# iOS
+/ios/build/
+/ios/Pods/
+/ios/*.xcworkspace
+/ios/*.xcodeproj
+/ios/DerivedData/
+/ios/InnolandGame.xcworkspace/xcshareddata/
+/ios/InnolandGame.xcodeproj/project.xcworkspace/xcshareddata/
+/ios/InnolandGame.xcodeproj/xcuserdata/
+
+# Expo
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Flipper
+ios/Pods/Flipper*
+ios/Pods/boost-for-react-native
+ios/Pods/Folly
+ios/Pods/RCT-Folly
+ios/Pods/RCTRequired
+ios/Pods/RCTTypeSafety
+ios/Pods/React-Core
+ios/Pods/React-CoreModules
+ios/Pods/React-RCTActionSheet
+ios/Pods/React-RCTAnimation
+ios/Pods/React-RCTBlob
+ios/Pods/React-RCTImage
+ios/Pods/React-RCTLinking
+ios/Pods/React-RCTNetwork
+ios/Pods/React-RCTSettings
+ios/Pods/React-RCTText
+ios/Pods/React-RCTVibration
+ios/Pods/React-cxxreact
+ios/Pods/React-jsi
+ios/Pods/React-jsiexecutor
+ios/Pods/React-jsinspector
+ios/Pods/React-logger
+ios/Pods/React-perflogger
+ios/Pods/Yoga
+ios/Pods/YogaKit
+
+# Testing
+coverage/
+*.lcov
+.nyc_output
+
+# Production builds
+build/
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db 
