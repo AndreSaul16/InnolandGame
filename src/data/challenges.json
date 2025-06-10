@@ -1,0 +1,57 @@
+[
+  {
+    "id": "qr-val-001",
+    "type": "validation",
+    "title": "Validación de Email",
+    "question": "El nuevo sistema de registro para la plataforma INNOLAND requiere un email corporativo. Escribe un ejemplo de email válido para un empleado de 'InnovateAragon'.",
+    "placeholder": "ejemplo@innovatearagon.com",
+    "criteria": "La respuesta debe ser un email con formato válido (contener un '@' y un '.'), y el dominio debe ser exactamente '@innovatearagon.com'. Evalúa estrictamente si cumple estas dos condiciones."
+  },
+  {
+    "id": "qr-val-002",
+    "type": "validation",
+    "title": "Acrónimo de Startup",
+    "question": "Un inversor te pregunta sobre el 'MVP' de tu proyecto. ¿Qué significa este acrónimo fundamental en el mundo de las startups?",
+    "placeholder": "Ej: Tres palabras...",
+    "criteria": "La respuesta debe ser 'Producto Mínimo Viable'. No se aceptan variantes ni sinónimos. Debe ser la frase exacta, sin importar mayúsculas o minúsculas."
+  },
+  {
+    "id": "qr-val-003",
+    "type": "validation",
+    "title": "Cifra Clave de IA",
+    "question": "Se estima que el mercado global de la Inteligencia Artificial alcanzará aproximadamente 1.8 billones de dólares para 2030. Escribe esta cifra usando únicamente números, sin puntos, comas ni símbolos.",
+    "placeholder": "18000...",
+    "criteria": "La respuesta debe ser un número. El número debe ser exactamente '1800000000000'. Cualquier otro formato es incorrecto."
+  },
+  {
+    "id": "qr-val-004",
+    "type": "validation",
+    "title": "Modelo de Negocio",
+    "question": "¿Cuál es el término en inglés, que combina 'free' y 'premium', para el modelo de negocio que ofrece un servicio básico gratuito y cobra por funciones avanzadas?",
+    "placeholder": "Empieza por F...",
+    "criteria": "La respuesta debe ser exactamente la palabra 'Freemium'. La evaluación no debe distinguir entre mayúsculas y minúsculas (case-insensitive)."
+  },
+  {
+    "id": "qr-val-005",
+    "type": "validation",
+    "title": "Identificador de Proyecto",
+    "question": "Para la gestión interna, se ha decidido que el nuevo proyecto de logística sostenible se llame 'TRON'. Crea su identificador único para el año actual (2025) siguiendo el formato estricto: PROJ-AÑO-NOMBRE.",
+    "placeholder": "PROJ-XXXX-XXXX",
+    "criteria": "La respuesta debe seguir el formato exacto 'PROJ-AÑO-NOMBRE'. Debe empezar con 'PROJ-', seguido del año '2025', un guion, y terminar con 'TRON'. La respuesta final debe ser 'PROJ-2025-TRON'."
+  },
+  {
+    "id": "qr-aud-001",
+    "type": "audio",
+    "title": "Elevator Pitch Rápido",
+    "question": "Imagina que te encuentras con un inversor. Graba un audio de 15 segundos explicando por qué la 'gamificación' es clave para la formación en empresas.",
+    "criteria": "La respuesta debe mencionar las palabras 'gamificación', 'motivación' y 'empresa'. Debe ser un audio claro y conciso."
+  },
+  {
+    "id": "qr-pit-001",
+    "type": "pitch",
+    "title": "Análisis de Pitch",
+    "pitch": "Nuestra startup, 'AgroTech 2025', usa drones con IA para detectar plagas en viñedos un 90% antes que el ojo humano, reduciendo el uso de pesticidas en un 40%.",
+    "question": "¿Cuál es la principal propuesta de valor de 'AgroTech 2025'?",
+    "criteria": "La respuesta correcta debe centrarse en la detección temprana de plagas o la reducción de pesticidas, que es el beneficio final. Evalúa si la respuesta del usuario captura esta idea central."
+  }
+]
