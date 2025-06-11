@@ -1,6 +1,6 @@
-# 🎮 InnolandGame
+# 🎮 InnolandGame - Beta
 
-Un juego educativo interactivo desarrollado con React Native y Expo que combina aprendizaje con diversión a través de desafíos gamificados.
+Un juego educativo interactivo desarrollado con React Native y Expo que combina aprendizaje con diversión a través de desafíos gamificados. **Versión Beta** - En desarrollo activo.
 
 ## 📋 Descripción
 
@@ -13,21 +13,24 @@ InnolandGame es una aplicación móvil que ofrece una experiencia de aprendizaje
 ## 🚀 Características Principales
 
 - ✨ **RolePicker**: Componente para selección de roles de usuario
-- 📷 **CameraOpener**: Funcionalidad de cámara integrada
-- 🎯 **ChallengeScreen**: Pantalla de desafíos interactivos
-- 🎨 **Animaciones GSAP**: Efectos visuales fluidos
+- 📷 **CameraOpener**: Funcionalidad de cámara integrada para escanear códigos QR
+- 🎯 **ChallengeManager**: Pantalla de desafíos interactivos
+- 🎨 **Animaciones fluidas**: Efectos visuales con React Native Reanimated
 - 📱 **Multiplataforma**: Compatible con iOS, Android y Web
-- 🎤 **Síntesis de voz**: Funcionalidad de texto a voz
+- 🎤 **Síntesis de voz**: Funcionalidad de texto a voz con Expo Speech
+- 🔒 **Permisos seguros**: Manejo de permisos de cámara y audio
 
 ## 🛠️ Tecnologías Utilizadas
 
 - **React Native** - Framework principal
-- **Expo** - Plataforma de desarrollo
-- **GSAP** - Animaciones avanzadas
-- **React Native Camera** - Funcionalidad de cámara
-- **React Native Speech** - Síntesis de voz
+- **Expo** - Plataforma de desarrollo y build
+- **React Native Reanimated** - Animaciones avanzadas
+- **Expo Camera** - Funcionalidad de cámara
+- **Expo Speech** - Síntesis de voz
 - **TypeScript** - Tipado estático
-- **Tailwind CSS** - Estilos (NativeWind)
+- **React Native Gesture Handler** - Gestos nativos
+- **React Native SVG** - Gráficos vectoriales
+- **Axios** - Cliente HTTP
 
 ## 📦 Instalación
 
@@ -35,7 +38,7 @@ InnolandGame es una aplicación móvil que ofrece una experiencia de aprendizaje
 
 - Node.js (versión 16 o superior)
 - npm o yarn
-- Expo CLI
+- Expo CLI (`npm install -g @expo/cli`)
 - Android Studio (para desarrollo Android)
 - Xcode (para desarrollo iOS, solo macOS)
 
@@ -79,18 +82,21 @@ InnolandGame es una aplicación móvil que ofrece una experiencia de aprendizaje
 InnolandGame/
 ├── src/
 │   ├── components/
-│   │   ├── UI/
-│   │   │   ├── RolePicker.jsx      # Selector de roles
-│   │   │   ├── ChallengeScreen.jsx # Pantalla de desafíos
-│   │   │   └── CameraOpener.jsx    # Componente de cámara
-│   │   ├── challenges/             # Componentes de desafíos
-│   │   └── utils/                  # Utilidades
-│   ├── services/                   # Servicios y APIs
-│   ├── data/                       # Datos estáticos
-│   └── styles/                     # Estilos globales
-├── App.js                          # Componente principal
-├── package.json                    # Dependencias del proyecto
-└── README.md                       # Este archivo
+│   │   ├── UI/                    # Componentes de interfaz
+│   │   │   ├── RolePicker.jsx     # Selector de roles
+│   │   │   ├── ChallengeManager.jsx # Pantalla de desafíos
+│   │   │   └── CameraOpener.jsx   # Componente de cámara
+│   │   ├── challenges/            # Componentes de desafíos
+│   │   └── utils/                 # Utilidades y helpers
+│   ├── services/                  # Servicios y APIs
+│   ├── data/                      # Datos estáticos
+│   └── styles/                    # Estilos globales
+├── assets/                        # Recursos multimedia
+├── android/                       # Configuración específica de Android
+├── App.js                         # Componente principal
+├── package.json                   # Dependencias del proyecto
+├── app.json                       # Configuración de Expo
+└── README.md                      # Este archivo
 ```
 
 ## 🎯 Uso
@@ -98,7 +104,7 @@ InnolandGame/
 1. **Selección de Rol**: Al iniciar la aplicación, el usuario debe seleccionar un rol de aprendizaje
 2. **Confirmación**: El sistema confirma la selección del rol
 3. **Desafíos**: Se presentan desafíos específicos según el rol elegido
-4. **Interacción**: El usuario puede usar la cámara, audio y otras funcionalidades
+4. **Interacción**: El usuario puede usar la cámara para escanear códigos QR, audio y otras funcionalidades
 
 ## 🔧 Scripts Disponibles
 
@@ -107,6 +113,36 @@ InnolandGame/
 - `npm run ios` - Ejecuta la app en iOS
 - `npm run web` - Ejecuta la app en el navegador web
 
+## 📱 Configuración de Permisos
+
+La aplicación requiere los siguientes permisos:
+- **Cámara**: Para escanear códigos QR de INNOLAND
+- **Audio**: Para funcionalidades de síntesis de voz
+
+## 🚧 Estado del Proyecto - Beta
+
+**Versión actual**: 1.0.0-beta
+
+### ✅ Funcionalidades Implementadas
+- Selección de roles de usuario
+- Sistema de desafíos básico
+- Integración de cámara para códigos QR
+- Síntesis de voz
+- Interfaz de usuario moderna
+- Configuración multiplataforma
+
+### 🔄 En Desarrollo
+- Mejoras en la experiencia de usuario
+- Optimización de rendimiento
+- Nuevos tipos de desafíos
+- Sistema de progreso del usuario
+
+### 📋 Próximas Funcionalidades
+- Sistema de puntuación
+- Modo multijugador
+- Personalización avanzada
+- Integración con backend
+
 ## 🤝 Contribución
 
 1. Fork el proyecto
@@ -114,6 +150,14 @@ InnolandGame/
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
+
+## 🐛 Reportar Bugs
+
+Si encuentras algún bug o tienes sugerencias, por favor:
+1. Revisa si ya existe un issue relacionado
+2. Crea un nuevo issue con una descripción detallada
+3. Incluye pasos para reproducir el problema
+4. Especifica tu dispositivo y versión del sistema operativo
 
 ## 📝 Licencia
 
@@ -127,8 +171,10 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 - Equipo de desarrollo de React Native
 - Comunidad de Expo
-- Contribuidores y testers
+- Contribuidores y testers de la versión beta
 
 ---
 
-⭐ Si te gusta este proyecto, ¡dale una estrella en GitHub! 
+⭐ Si te gusta este proyecto, ¡dale una estrella en GitHub!
+
+**Nota**: Esta es una versión beta. Algunas funcionalidades pueden estar en desarrollo o sujetas a cambios. 

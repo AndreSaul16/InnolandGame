@@ -2,7 +2,7 @@
   "expo": {
     "name": "InnolandGame",
     "slug": "InnolandGame",
-    "version": "1.0.0",
+    "version": "1.0.0-beta",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -11,7 +11,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.android.InnolandGame",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -31,6 +35,11 @@
           "cameraPermission": "Necesitamos acceso a tu cámara para escanear los códigos QR de INNOLAND."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "9e7f0195-cd2c-46ba-85b1-73399b8744a9"
+      }
+    }
   }
 }

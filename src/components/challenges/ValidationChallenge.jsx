@@ -114,3 +114,14 @@ const styles = StyleSheet.create({
 });
 
 export default ValidationChallenge;
+
+/**
+ * Valida la respuesta de un usuario para un reto usando la API de OpenAI.
+ * @param {string} challengeCriteria - Criterios de evaluación del reto.
+ * @param {string} userAnswer - Respuesta del usuario.
+ * @param {string} playerRole - Rol del jugador.
+ * @returns {Promise<{isCorrect: boolean, feedback: string}>}
+ */
+export async function validateChallengeAnswer(challengeCriteria, userAnswer, playerRole) {
+  return await OpenAIService.evaluateAnswer(challengeCriteria, userAnswer, playerRole);
+}

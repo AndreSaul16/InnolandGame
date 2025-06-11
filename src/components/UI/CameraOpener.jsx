@@ -1,19 +1,13 @@
 import React from 'react';
 // 1. Importamos las herramientas que necesitamos de React Native.
-//    - `Dimensions`: Para obtener el tamaño de la pantalla.
-//    - `BackHandler`: Para poder cerrar la aplicación programáticamente.
-import { View, Text, Platform, Button, TouchableOpacity, StyleSheet, BackHandler, Dimensions } from 'react-native';
+import { View, Text, Platform, Button, TouchableOpacity, StyleSheet, StatusBar as RNStatusBar } from 'react-native';
 // `StatusBar` de Expo nos da más control sobre la barra de estado.
 import { StatusBar } from 'expo-status-bar';
 // Componentes específicos para la funcionalidad de la cámara.
 import { CameraView, useCameraPermissions } from 'expo-camera';
 // Un icono para el botón de cerrar, de una librería externa.
 import { XMarkIcon } from "react-native-heroicons/solid";
-
-// 2. OBTENEMOS LAS DIMENSIONES DE LA PANTALLA COMPLETA
-// Usamos .get('screen') en lugar de .get('window').
-// 'screen' incluye el área de la barra de navegación de Android, eliminando la línea blanca.
-const { width, height } = Dimensions.get('screen');
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Definimos el componente, recibiendo varias funciones (props) desde el componente padre.
 const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryScan, onClose }) => {
@@ -35,32 +29,23 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
     }
   }, [permission, onPermissionError]);
 
-  // Esta función se llamará cuando el usuario pulse el botón de la 'X'.
-  const handleCloseAndExit = () => {
-    // Primero, ejecuta la función `onClose` del padre (si existe).
-    if (onClose) {
-      onClose();
-    }
-    // Después, le ordena a la aplicación que se cierre.
-    BackHandler.exitApp();
-  };
-
+  
   // ----- RENDERIZADO CONDICIONAL -----
   // A continuación, decidimos qué mostrar en pantalla según el estado de los permisos.
 
   // Caso 1: Si es la versión web.
   if (Platform.OS === 'web') {
-    return <Text className="text-center mt-12 text-lg">El escaneo de QR no está disponible en la web.</Text>;
+    return <Text style={styles.infoText}>El escaneo de QR no está disponible en la web.</Text>;
   }
   // Caso 2: Si todavía estamos esperando la respuesta del sistema sobre los permisos.
   if (!permission) {
-    return <Text className="text-center mt-12 text-lg">Verificando permisos...</Text>;
+    return <Text style={styles.infoText}>Verificando permisos...</Text>;
   }
   // Caso 3: Si sabemos que el permiso NO está concedido.
   if (!permission.granted) {
     return (
-      <View className="flex-1 justify-center items-center p-5 bg-white">
-        <Text className="text-center mb-5 text-lg">
+      <View style={styles.permissionContainer}>
+        <Text style={styles.permissionText}>
           Necesitamos acceso a tu cámara para escanear códigos QR
         </Text>
         <Button title="Permitir cámara" onPress={requestPermission} />
@@ -70,21 +55,15 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
   
   // Caso 4 (Éxito): Si todos los permisos están en orden, mostramos la cámara.
   return (
-    // Usamos un Fragmento (`<>...</>`) para agrupar varios componentes sin crear un `View` extra.
     <>
-      {/* El "control remoto" de la barra de estado. `style="light"` pone el texto en blanco. */}
       <StatusBar style="light" />
 
-      {/* 3. EL CONTENEDOR PRINCIPAL (LA "CAJA") */}
-      {/* Forzamos el tamaño de esta "caja" a las dimensiones exactas de la pantalla.
-          Esta es la solución más robusta porque no depende del layout de ningún padre. */}
-      <View style={{ width: width, height: height }}>
-        
-        {/* 4. LA CÁMARA */}
-        {/* Le ordenamos a la cámara que se expanda para rellenar completamente la "caja"
-            que la contiene, usando el estilo predefinido `absoluteFillObject`. */}
+      {/* Usamos un SafeAreaView para que el contenido se vea bien y no se solape
+          con la barra de estado, especialmente en iOS. */}
+      <SafeAreaView style={styles.cameraContainer}>
+        {/* Este componente muestra la imagen de la cámara. */}
         <CameraView
-          style={StyleSheet.absoluteFillObject}
+          style={StyleSheet.absoluteFillObject} // Estilo clave para que la cámara llene el contenedor.
           facing="back"
           onBarcodeScanned={isScanned ? undefined : onBarCodeScanned}
           barcodeScannerSettings={{
@@ -92,19 +71,19 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
           }}
         />
         
-        {/* 5. LOS OVERLAYS (Elementos superpuestos) */}
-        {/* Estos se posicionan de forma absoluta dentro de la "caja". */}
+        {/* Botón para cerrar la cámara (la 'X'). */}
         <TouchableOpacity
-          onPress={handleCloseAndExit}
-          className="absolute z-10 top-14 right-5 bg-red-500 active:bg-red-600 shadow-lg shadow-black rounded-full w-12 h-12 justify-center items-center"
+          onPress={onClose}
+          style={styles.closeButton}
+          activeOpacity={0.7} // Controla la opacidad al pulsar.
         >
           <XMarkIcon size={28} color="white" />
         </TouchableOpacity>
         
         {/* Este overlay solo se muestra si `isScanned` es verdadero. */}
         {isScanned && (
-          <View className="absolute z-10 bottom-0 left-0 right-0 p-10 bg-black/50 items-center">
-            <Text className="text-white text-xl font-bold mb-4">Procesando...</Text>
+          <View style={styles.scannedOverlay}>
+            <Text style={styles.scannedOverlayText}>Procesando...</Text>
             <Button 
               title="Escanear de Nuevo" 
               onPress={onRetryScan}
@@ -112,10 +91,79 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
             />
           </View>
         )}
-      </View>
+      </SafeAreaView>
     </>
   );
 };
 
-// Exportamos el componente para que pueda ser usado en otras partes de la app.
+// --- DEFINICIÓN DE ESTILOS ---
+// Aquí se traducen todas las clases de Tailwind a objetos de estilo de React Native.
+const styles = StyleSheet.create({
+  // Estilo para los textos informativos (ej. "Verificando permisos...").
+  infoText: {
+    textAlign: 'center',    // Centra el texto horizontalmente.
+    marginTop: 48,          // Margen superior para separarlo del borde.
+    fontSize: 18,           // Tamaño de la fuente.
+  },
+  // Contenedor para la pantalla de solicitud de permisos.
+  permissionContainer: {
+    flex: 1,                // Ocupa todo el espacio disponible.
+    justifyContent: 'center', // Centra el contenido verticalmente.
+    alignItems: 'center',   // Centra el contenido horizontalmente.
+    padding: 20,            // Espaciado interior.
+    backgroundColor: 'white', // Color de fondo.
+  },
+  // Estilo para el texto en la pantalla de permisos.
+  permissionText: {
+    textAlign: 'center',    // Centra el texto.
+    marginBottom: 20,       // Margen inferior para separarlo del botón.
+    fontSize: 18,           // Tamaño de la fuente.
+  },
+  // Contenedor principal para la vista de la cámara.
+  cameraContainer: {
+    flex: 1,                // Ocupa todo el espacio disponible.
+    backgroundColor: 'black', // Fondo negro, visible mientras la cámara inicia.
+    // Añadimos el padding superior en Android para evitar el solapamiento con la barra de estado.
+    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
+  },
+  // Estilo para el botón de cerrar.
+  closeButton: {
+    position: 'absolute',   // Lo saca del flujo normal para posicionarlo libremente.
+    zIndex: 10,             // Asegura que esté por encima de la cámara.
+    top: 56,                // Distancia desde el borde superior.
+    right: 20,              // Distancia desde el borde derecho.
+    backgroundColor: 'rgba(220, 38, 38, 0.8)', // Fondo rojo con 80% de opacidad.
+    borderRadius: 9999,     // Un radio de borde muy grande para crear un círculo.
+    width: 48,              // Ancho del botón.
+    height: 48,             // Alto del botón.
+    justifyContent: 'center', // Centra el icono 'X' verticalmente.
+    alignItems: 'center',   // Centra el icono 'X' horizontalmente.
+    // Sombra para iOS.
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    // Sombra para Android.
+    elevation: 8,
+  },
+  // Overlay que aparece después de escanear.
+  scannedOverlay: {
+    position: 'absolute',   // Posicionamiento absoluto.
+    zIndex: 10,             // Asegura que esté por encima de la cámara.
+    bottom: 0,              // Lo fija al borde inferior.
+    left: 0,                // Lo fija al borde izquierdo.
+    right: 0,               // Lo fija al borde derecho.
+    padding: 40,            // Espaciado interior grande.
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo negro con 50% de opacidad.
+    alignItems: 'center',   // Centra su contenido (texto y botón) horizontalmente.
+  },
+  // Texto dentro del overlay.
+  scannedOverlayText: {
+    color: 'white',         // Color del texto.
+    fontSize: 20,           // Tamaño de la fuente.
+    fontWeight: 'bold',     // Texto en negrita.
+    marginBottom: 16,       // Margen inferior para separarlo del botón.
+  },
+});
+
 export default CameraOpener;
