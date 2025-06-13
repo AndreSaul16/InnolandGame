@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
+  Dimensions,
 } from "react-native";
 import { PLAYER_ROLES_DATA } from "../../../data/gameState";
 import {
@@ -17,6 +18,7 @@ import {
   EyeIcon,
   PaintBrushIcon,
 } from "react-native-heroicons/solid";
+import { COLORS, FONTS } from '../../../theme';
 
 const iconComponents = {
   SparklesIcon,
@@ -29,19 +31,20 @@ const iconComponents = {
   PaintBrushIcon,
 };
 
-const SimpleRoleButton = ({ role, isSelected, onPress }) => {
+const SimpleRoleButton = ({ role, isSelected, onPress, buttonStyle }) => {
   const IconComponent = iconComponents[role.icon];
   return (
     <TouchableOpacity
       onPress={() => onPress(role.name)}
       style={[
+        buttonStyle,
         styles.button,
         isSelected ? styles.buttonSelected : styles.buttonUnselected,
       ]}
       activeOpacity={0.9}
     >
       {IconComponent && (
-        <IconComponent size={36} color={isSelected ? "#fff" : "#60A5FA"} style={{ marginBottom: 8 }} />
+        <IconComponent size={36} color={isSelected ? "#fff" : COLORS.darkBlue} style={{ marginBottom: 8 }} />
       )}
       <Text
         style={[
@@ -53,18 +56,44 @@ const SimpleRoleButton = ({ role, isSelected, onPress }) => {
       >
         {role.name}
       </Text>
-      <Text style={styles.buttonDescription} numberOfLines={3} ellipsizeMode="tail">
-        {role.description}
-      </Text>
     </TouchableOpacity>
   );
 };
 
 export default function RoleList({ selectedRole, onRoleSelect }) {
+  // Obtener dimensiones de pantalla
+  const { width: SCREEN_WIDTH } = Dimensions.get('window');
+  const CARD_WIDTH = SCREEN_WIDTH * 0.44; // 2 columnas con margen
+  const CARD_HEIGHT = CARD_WIDTH * 0.9; // Relación de aspecto
+
+  // Estilos dinámicos para los recuadros
+  const dynamicStyles = StyleSheet.create({
+    itemContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 16,
+      width: CARD_WIDTH,
+      height: CARD_HEIGHT,
+    },
+    button: {
+      width: CARD_WIDTH,
+      height: CARD_HEIGHT,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 18,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.18,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Selecciona un Rol</Text>
-      <Text style={styles.subtitle}>Elige el rol que deseas asignar.</Text>
+      <Text style={styles.subtitle}>Elige el rol con el que estas jugando</Text>
       <FlatList
         data={PLAYER_ROLES_DATA}
         keyExtractor={(item) => item.name}
@@ -72,11 +101,12 @@ export default function RoleList({ selectedRole, onRoleSelect }) {
         contentContainerStyle={styles.rolesListContainer}
         columnWrapperStyle={styles.columnWrapper}
         renderItem={({ item }) => (
-          <View style={styles.itemContainer}>
+          <View style={dynamicStyles.itemContainer}>
             <SimpleRoleButton
               role={item}
               isSelected={selectedRole === item.name}
               onPress={onRoleSelect}
+              buttonStyle={dynamicStyles.button}
             />
           </View>
         )}
@@ -85,87 +115,68 @@ export default function RoleList({ selectedRole, onRoleSelect }) {
   );
 }
 
-const CARD_HEIGHT = 150;
-const CARD_WIDTH = 170;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff", // gris oscuro
+    backgroundColor: COLORS.white,
     padding: 20,
-    justifyContent: "flex-start",
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   title: {
-    color: "#1d2630",
+    fontFamily: FONTS.title,
+    color: COLORS.darkBlue,
     fontSize: 26,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 6,
-    textAlign: "center",
+    textAlign: 'center',
     letterSpacing: 0.5,
   },
   subtitle: {
-    color: "#60A5FA",
+    color: COLORS.blue,
     fontSize: 16,
     marginBottom: 18,
-    textAlign: "center",
-    fontWeight: "500",
+    textAlign: 'center',
+    fontWeight: '500',
   },
   rolesListContainer: {
     paddingBottom: 16,
     paddingTop: 8,
-    justifyContent: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   columnWrapper: {
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  itemContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-  },
-  button: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 6,
+    justifyContent: 'space-between',
+    gap: 6,
   },
   buttonSelected: {
-    backgroundColor: "#2563EB", // azul fuerte
+    backgroundColor: COLORS.blue,
     borderWidth: 2,
-    borderColor: "#60A5FA",
+    borderColor: COLORS.primary,
   },
   buttonUnselected: {
-    backgroundColor: "#1E293B", // azul grisáceo
+    backgroundColor: COLORS.primary,
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: COLORS.darkBlue,
   },
   buttonText: {
     fontSize: 17,
-    fontWeight: "700",
-    textAlign: "center",
+    fontWeight: '700',
+    textAlign: 'center',
     marginBottom: 4,
     letterSpacing: 0.2,
+    fontFamily: FONTS.text,
   },
   buttonTextSelected: {
-    color: "#F1F5F9",
+    color: COLORS.white,
   },
   buttonTextUnselected: {
-    color: "#60A5FA",
+    color: COLORS.darkBlue,
   },
   buttonDescription: {
-    color: "#CBD5E1",
+    color: COLORS.gray,
     fontSize: 13,
-    textAlign: "center",
+    textAlign: 'center',
     marginTop: 2,
     lineHeight: 16,
   },

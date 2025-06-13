@@ -8,6 +8,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 // Un icono para el botón de cerrar, de una librería externa.
 import { XMarkIcon } from "react-native-heroicons/solid";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { COLORS, FONTS } from '../../theme';
 
 // Definimos el componente, recibiendo varias funciones (props) desde el componente padre.
 const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryScan, onClose }) => {
@@ -35,7 +36,171 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
 
   // Caso 1: Si es la versión web.
   if (Platform.OS === 'web') {
-    return <Text style={styles.infoText}>El escaneo de QR no está disponible en la web.</Text>;
+    // --- Lógica de escaneo QR en web ---
+    const videoRef = React.useRef(null);
+    const canvasRef = React.useRef(null);
+    const [stream, setStream] = React.useState(null);
+    const [scanning, setScanning] = React.useState(true);
+    const [error, setError] = React.useState(null);
+
+    React.useEffect(() => {
+      let animationId;
+      let localStream;
+      let isMounted = true;
+
+      async function startCamera() {
+        try {
+          const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          if (videoRef.current) {
+            videoRef.current.srcObject = s;
+            videoRef.current.setAttribute('playsinline', true); // Para iOS Safari
+            videoRef.current.play();
+          }
+          setStream(s);
+        } catch (err) {
+          setError('No se pudo acceder a la cámara.');
+        }
+      }
+
+      startCamera();
+
+      function stopCamera() {
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+        }
+      }
+
+      function scan() {
+        if (!videoRef.current || !canvasRef.current || !scanning) return;
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        try {
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          // eslint-disable-next-line
+          const jsQR = require('jsqr');
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          if (code && code.data) {
+            setScanning(false);
+            if (onBarCodeScanned) {
+              onBarCodeScanned({ data: code.data, type: 'qr' });
+            }
+          }
+        } catch (e) {
+          // Silenciar errores de escaneo
+        }
+        animationId = requestAnimationFrame(scan);
+      }
+
+      if (scanning) {
+        animationId = requestAnimationFrame(scan);
+      }
+
+      return () => {
+        isMounted = false;
+        if (animationId) cancelAnimationFrame(animationId);
+        stopCamera();
+      };
+      // eslint-disable-next-line
+    }, [scanning]);
+
+    const handleRetry = () => {
+      setScanning(true);
+      if (onRetryScan) onRetryScan();
+    };
+
+    const handleClose = () => {
+      setScanning(false);
+      if (onClose) onClose();
+    };
+
+    return (
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: '60vw',
+        maxWidth: 400,
+        maxHeight: 400,
+        margin: '40px auto',
+        background: 'black',
+        borderRadius: 16,
+        overflow: 'hidden',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        {error ? (
+          <p style={{ color: 'red', textAlign: 'center', width: '100%' }}>{error}</p>
+        ) : (
+          <>
+            <video
+              ref={videoRef}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              autoPlay
+              muted
+            />
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
+            {/* Botón de cerrar */}
+            <button
+              onClick={handleClose}
+              style={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                background: 'rgba(220,38,38,0.8)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 40,
+                height: 40,
+                color: 'white',
+                fontSize: 24,
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10,
+              }}
+              aria-label="Cerrar"
+            >
+              ×
+            </button>
+            {/* Overlay de escaneado */}
+            {!scanning && (
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                padding: 32,
+                background: 'rgba(0,0,0,0.5)',
+                color: 'white',
+                textAlign: 'center',
+                zIndex: 10,
+              }}>
+                <div style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>Procesando...</div>
+                <button
+                  onClick={handleRetry}
+                  style={{
+                    background: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '8px 16px',
+                    fontSize: 16,
+                    cursor: 'pointer',
+                  }}
+                >Escanear de Nuevo</button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
   }
   // Caso 2: Si todavía estamos esperando la respuesta del sistema sobre los permisos.
   if (!permission) {
@@ -104,6 +269,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',    // Centra el texto horizontalmente.
     marginTop: 48,          // Margen superior para separarlo del borde.
     fontSize: 18,           // Tamaño de la fuente.
+    fontFamily: FONTS.text,
+    color: COLORS.darkBlue,
   },
   // Contenedor para la pantalla de solicitud de permisos.
   permissionContainer: {
@@ -118,6 +285,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',    // Centra el texto.
     marginBottom: 20,       // Margen inferior para separarlo del botón.
     fontSize: 18,           // Tamaño de la fuente.
+    fontFamily: FONTS.text,
+    color: COLORS.darkBlue,
   },
   // Contenedor principal para la vista de la cámara.
   cameraContainer: {
@@ -128,23 +297,24 @@ const styles = StyleSheet.create({
   },
   // Estilo para el botón de cerrar.
   closeButton: {
-    position: 'absolute',   // Lo saca del flujo normal para posicionarlo libremente.
-    zIndex: 10,             // Asegura que esté por encima de la cámara.
-    top: 56,                // Distancia desde el borde superior.
-    right: 20,              // Distancia desde el borde derecho.
-    backgroundColor: 'rgba(220, 38, 38, 0.8)', // Fondo rojo con 80% de opacidad.
-    borderRadius: 9999,     // Un radio de borde muy grande para crear un círculo.
-    width: 48,              // Ancho del botón.
-    height: 48,             // Alto del botón.
-    justifyContent: 'center', // Centra el icono 'X' verticalmente.
-    alignItems: 'center',   // Centra el icono 'X' horizontalmente.
-    // Sombra para iOS.
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    // Sombra para Android.
-    elevation: 8,
+    position: 'absolute',
+    zIndex: 10,
+    top: 56,
+    right: 20,
+    backgroundColor: COLORS.primary,
+    borderRadius: 9999,
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Sombra solo en móvil
+    ...(Platform.OS !== 'web' ? {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 8,
+    } : {}),
   },
   // Overlay que aparece después de escanear.
   scannedOverlay: {
@@ -163,6 +333,7 @@ const styles = StyleSheet.create({
     fontSize: 20,           // Tamaño de la fuente.
     fontWeight: 'bold',     // Texto en negrita.
     marginBottom: 16,       // Margen inferior para separarlo del botón.
+    fontFamily: FONTS.text,
   },
 });
 

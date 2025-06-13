@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Animated, Easing, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AudioChallenge from '../challenges/AudioChallenge';
+import { COLORS, FONTS } from '../../theme';
 
 // Este componente solo muestra el reto y recoge la respuesta del usuario
-const ChallengeUI = ({ challenge, onSubmit, loading, validationResult }) => {
+const ChallengeUI = ({ challenge, onSubmit, loading, validationResult, onBack }) => {
   const [userInput, setUserInput] = useState('');
   const animValue = useRef(new Animated.Value(0)).current;
 
@@ -49,19 +50,27 @@ const ChallengeUI = ({ challenge, onSubmit, loading, validationResult }) => {
               Keyboard.dismiss();
               onSubmit(userInput);
             }}
-            disabled={loading || !userInput}
-            color="#4F8EF7"
+            disabled={loading || !userInput || !!validationResult}
+            color={COLORS.blue}
           />
         </View>
-        {loading && <ActivityIndicator style={{ marginTop: 20 }} size="large" color="#4F8EF7" />}
+        <View style={styles.backButtonContainer}>
+          <Button
+            title="Regresar"
+            onPress={onBack}
+            color={COLORS.gray}
+            disabled={!validationResult}
+          />
+        </View>
+        {loading && <ActivityIndicator style={{ marginTop: 20 }} size="large" color={COLORS.blue} />}
         {validationResult && (
           <Animated.View
             style={[
               styles.resultBox,
               {
-                backgroundColor: validationResult.isCorrect ? '#d4edda' : '#f8d7da',
-                borderColor: validationResult.isCorrect ? '#28a745' : '#dc3545',
-                shadowColor: validationResult.isCorrect ? '#28a745' : '#dc3545',
+                backgroundColor: validationResult.isCorrect ? COLORS.successBackground : COLORS.errorBackground,
+                borderColor: validationResult.isCorrect ? COLORS.success : COLORS.error,
+                shadowColor: validationResult.isCorrect ? COLORS.success : COLORS.error,
                 transform: [
                   {
                     scale: animValue.interpolate({
@@ -80,7 +89,7 @@ const ChallengeUI = ({ challenge, onSubmit, loading, validationResult }) => {
               },
             ]}
           >
-            <Text style={[styles.resultTitle, { color: validationResult.isCorrect ? '#155724' : '#721c24' }]}> 
+            <Text style={[styles.resultTitle, { color: validationResult.isCorrect ? COLORS.successText : COLORS.errorText }]}> 
               {validationResult.isCorrect ? '¡CORRECTO!' : 'INCORRECTO'}
             </Text>
             <Text style={styles.feedbackText}>{validationResult.feedback}</Text>
@@ -94,7 +103,7 @@ const ChallengeUI = ({ challenge, onSubmit, loading, validationResult }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f4f6fb',
+    backgroundColor: COLORS.background,
   },
   container: {
     flex: 1,
@@ -108,26 +117,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 12,
-    color: '#22223b',
+    color: COLORS.darkBlue,
     letterSpacing: 1,
+    fontFamily: FONTS.title,
   },
   question: {
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 24,
-    color: '#4F8EF7',
+    color: COLORS.blue,
     fontWeight: '500',
   },
   input: {
     borderWidth: 1.5,
-    borderColor: '#4F8EF7',
+    borderColor: COLORS.blue,
     padding: 12,
     borderRadius: 10,
     marginBottom: 24,
     fontSize: 17,
     width: '100%',
     backgroundColor: '#fff',
-    shadowColor: '#4F8EF7',
+    shadowColor: COLORS.blue,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -138,11 +148,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 16,
-    shadowColor: '#4F8EF7',
+    shadowColor: COLORS.blue,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 3,
+    backgroundColor: COLORS.blue,
+  },
+  backButtonContainer: {
+    width: '100%',
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginBottom: 8,
+    marginTop: 0,
   },
   resultBox: {
     marginTop: 28,

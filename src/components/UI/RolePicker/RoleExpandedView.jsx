@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import { ArrowLeftIcon, UserCircleIcon } from "react-native-heroicons/solid";
 import ConfirmButton from "./ConfirmButton";
+import { COLORS, FONTS } from '../../../theme';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -42,10 +43,10 @@ const styles = StyleSheet.create({
   },
   expandedBackground: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#ffffffa6',
+    backgroundColor: COLORS.white + 'a6',
   },
   expandedCard: {
-    backgroundColor: '#1E40AF',
+    backgroundColor: COLORS.blue,
     borderRadius: 24,
     padding: 24,
     alignItems: 'center',
@@ -55,17 +56,19 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   expandedRoleTitle: {
-    color: 'white',
+    color: COLORS.white,
     fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
     marginVertical: 16,
+    fontFamily: FONTS.title,
   },
   expandedRoleDescription: {
-    color: '#E2E8F0',
+    color: COLORS.white,
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 24,
+    fontFamily: FONTS.text,
   },
   backButton: {
     flexDirection: 'row',
@@ -74,14 +77,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.primary,
     marginTop: 12,
   },
   backButtonText: {
-    color: 'white',
+    color: COLORS.darkBlue,
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+    fontFamily: FONTS.text,
   },
 });
 

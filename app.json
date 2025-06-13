@@ -34,7 +34,8 @@
         {
           "cameraPermission": "Necesitamos acceso a tu cámara para escanear los códigos QR de INNOLAND."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "eas": {

@@ -1,6 +1,7 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 import { CheckCircleIcon } from "react-native-heroicons/solid";
+import { COLORS, FONTS } from '../../../theme';
 
 const ConfirmButton = ({ onPress, children }) => (
   <View style={styles.buttonWrapper}>
@@ -19,25 +20,26 @@ const styles = StyleSheet.create({
     marginVertical: 35,
   },
   confirmButton: {
-    backgroundColor: "#10B981",
+    backgroundColor: COLORS.primary,
     borderRadius: 50,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 3,
     minHeight: 50,
     minWidth: 100,
     elevation: 10,
   },
   confirmButtonText: {
-    color: "#FFFFFF",
+    color: COLORS.white,
     fontSize: 18,
-    fontWeight: "bold",
-    textShadowColor: 'rgba(0,0,0,0.2)',
+    fontWeight: 'bold',
+    textShadowColor: COLORS.darkBlue,
     textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadowRadius: 5,
     marginRight: 10,
+    fontFamily: FONTS.text,
   },
 });
 

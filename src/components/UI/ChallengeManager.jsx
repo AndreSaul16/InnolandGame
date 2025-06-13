@@ -4,8 +4,11 @@ import CameraOpener from './CameraOpener';
 import ChallengeUI from './ChallengeUI';
 import challengesData from '../../data/challenges.json';
 import { validateChallengeAnswer } from '../challenges/ValidationChallenge';
+import { useRoute } from '@react-navigation/native';
 
 export default function ChallengeManager() {
+  const route = useRoute();
+  const user = route?.params?.user;
   const [step, setStep] = useState('ROLE_SELECTION');
   const [playerRole, setPlayerRole] = useState(null);
   const [qrCode, setQrCode] = useState(null);
@@ -46,6 +49,14 @@ export default function ChallengeManager() {
     setValidationResult(null);
   };
 
+  // Nuevo handler para regresar a la cámara
+  const handleBackToScan = () => {
+    setStep('SCANNING');
+    setQrCode(null);
+    setCurrentChallenge(null);
+    setValidationResult(null);
+  };
+
   // Validar la respuesta del usuario
   const handleValidateAnswer = async (userInput) => {
     if (!currentChallenge || !playerRole) return;
@@ -68,12 +79,13 @@ export default function ChallengeManager() {
   };
 
   if (step === 'ROLE_SELECTION') {
-    return <RolePicker onRoleConfirm={handleRoleConfirmed} />;
+    return <RolePicker user={user} onRoleConfirm={handleRoleConfirmed} />;
   }
 
   if (step === 'SCANNING') {
     return (
       <CameraOpener
+        user={user}
         onBarCodeScanned={handleBarCodeScanned}
         onClose={handleBackToRole}
         isScanned={!!qrCode}
@@ -85,11 +97,13 @@ export default function ChallengeManager() {
   if (step === 'CHALLENGE') {
     return (
       <ChallengeUI
+        user={user}
         challenge={currentChallenge}
         playerRole={playerRole}
         onSubmit={handleValidateAnswer}
         loading={loading}
         validationResult={validationResult}
+        onBack={handleBackToScan}
       />
     );
   }
