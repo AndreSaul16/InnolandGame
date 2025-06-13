@@ -8,6 +8,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "build:web": "expo export --platform web",
+    "build": "react-scripts build",
     "build:android": "eas build -p android --profile production",
     "deploy:azure": "npm run build:web && echo 'Build completado. Sube la carpeta dist a Azure Web App'",
     "serve:web": "npx serve dist -s -l 3000"
