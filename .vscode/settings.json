@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/aca718a0-3d5a-4a5f-aaed-d00cc55cd6ea/resourceGroups/appsvc_linux_centralus_basic/providers/Microsoft.Web/sites/InnolandGame",
+    "appService.deploySubpath": "dist"
+}
