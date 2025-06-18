@@ -1,166 +1,114 @@
-// src/services/OpenAIService.js
-import axios from "axios";
-import { REACT_APP_OPENAI_API_KEY, REACT_APP_OPENAI_ASSISTANT_ID } from "@env";
+/**
+ * ARCHIVO: src/services/OpenAIService.js
+ * DESCRIPCIÓN: Servicio para interactuar con el backend de Firebase.
+ * Este código NO maneja claves de API. Su única responsabilidad es
+ * llamar a las Cloud Functions seguras.
+ */
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { app } from './FirebaseDataService';
+import { getAuth } from "firebase/auth";
 
 class OpenAIService {
   constructor() {
-    console.log(
-      "🔑 Cargando API Key:",
-      REACT_APP_OPENAI_API_KEY ? "Encontrada" : "NO ENCONTRADA"
+    // --- Configuración ---
+    // Inicializa las referencias a los servicios de Firebase.
+    const functions = getFunctions(app);
+    const storage = getStorage(app);
+
+    // Referencia a la Cloud Function 'evaluateChallenge' en el backend.
+    this.evaluateChallengeFunction = httpsCallable(
+      functions,
+      "evaluateChallenge"
     );
 
-    // Esto se mantiene igual. Carga las credenciales y configura el cliente.
-    this.apiKey = REACT_APP_OPENAI_API_KEY;
-    this.assistantId = REACT_APP_OPENAI_ASSISTANT_ID;
+    // Referencia a la Cloud Function 'transcribeAudio' en el backend.
+    this.transcribeAudioFunction = httpsCallable(functions, "transcribeAudio");
 
-    if (!this.apiKey || !this.assistantId) {
-      throw new Error(
-        "OpenAI API Key or Assistant ID is missing. Check your .env file."
-      );
-    }
+    // Referencia a Firebase Storage para subir archivos de audio.
+    this.storage = storage;
 
-    this.client = axios.create({
-      baseURL: "https://api.openai.com/v1",
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json",
-        "OpenAI-Beta": "assistants=v2",
-      },
-    });
+    console.log(
+      "✅ OpenAIService listo para comunicarse con el backend seguro de Firebase."
+    );
   }
 
   /**
-   * Evalúa la respuesta de un usuario enviando solo los datos del turno a Innolodón.
-   * Innolodón ya conoce su rol y formato de respuesta desde la plataforma de OpenAI.
-   * @param {string} challengeCriteria Los criterios del reto actual.
-   * @param {string} userAnswer La respuesta del jugador.
-   * @param {string} playerRole El rol actual del jugador.
+   * Evalúa la respuesta de un usuario llamando a la Cloud Function segura.
+   * @param {string} challengeCriteria Criterios del reto.
+   * @param {string} userAnswer Respuesta del jugador.
+   * @param {string} playerRole Rol del jugador.
    * @returns {Promise<{isCorrect: boolean, feedback: string}>} El resultado de la evaluación.
    */
   async evaluateAnswer(challengeCriteria, userAnswer, playerRole) {
-    // CAMBIO CLAVE: El prompt ahora es mucho más simple.
-    // Solo enviamos los datos variables de este turno. Las instrucciones
-    // generales ya las tiene Innolodón.
-    const userPrompt = `
-      Datos para la Evaluación:
-      {
-        "playerRole": "${playerRole}",
-        "evaluationCriteria": "${challengeCriteria}",
-        "playerAnswer": "${userAnswer}"
-      }
-    `;
+    const playerData = {
+      evaluationCriteria: challengeCriteria,
+      playerAnswer: userAnswer,
+      playerRole: playerRole,
+    };
+
+    console.log(
+      "📲 Enviando datos a la Cloud Function 'evaluateChallenge'...",
+      playerData
+    );
 
     try {
-      // Llamamos al mismo método privado que ya funcionaba.
-      const assistantResponseText = await this._runAssistantWithPrompt(
-        userPrompt
-      );
-
-      // La respuesta de la IA (garantizada como JSON) se parsea como antes.
-      return JSON.parse(assistantResponseText);
+      // Llama a la función en la nube. La lógica y las claves están seguras en el backend.
+      const result = await this.evaluateChallengeFunction(playerData);
+      console.log("✅ Respuesta recibida de 'evaluateChallenge':", result.data);
+      // Firebase envuelve la respuesta en un objeto 'data'. Lo extraemos y lo devolvemos.
+      return result.data;
     } catch (error) {
-      console.error("[OpenAIService] Error evaluating answer:", error);
+      console.error(
+        `[OpenAIService] Error llamando a 'evaluateChallenge' (${error.code}):`,
+        error.message
+      );
       return {
         isCorrect: false,
         feedback:
-          "Innolodón no ha podido evaluar la respuesta. Inténtalo de nuevo.",
+          "Innolodón no ha podido evaluar la respuesta. Revisa la conexión con el servidor.",
       };
     }
   }
 
-  // Este método privado no necesita cambios. Su lógica para manejar
-  // la conversación con el asistente sigue siendo correcta.
-  async _runAssistantWithPrompt(prompt) {
-    try {
-      const threadResponse = await this.client.post("/threads");
-      const threadId = threadResponse.data.id;
-
-      await this.client.post(`/threads/${threadId}/messages`, {
-        role: "user",
-        content: prompt,
-      });
-
-      const runResponse = await this.client.post(`/threads/${threadId}/runs`, {
-        assistant_id: this.assistantId,
-      });
-      const runId = runResponse.data.id;
-      let runStatus = runResponse.data.status;
-      let attempts = 0;
-      while (
-        (runStatus === "queued" || runStatus === "in_progress") &&
-        attempts < 20
-      ) {
-        await sleep(1500);
-        const statusResponse = await this.client.get(
-          `/threads/${threadId}/runs/${runId}`
-        );
-        runStatus = statusResponse.data.status;
-        attempts++;
-      }
-
-      if (runStatus !== "completed") {
-        throw new Error(`Run failed with status: ${runStatus}`);
-      }
-
-      const messagesResponse = await this.client.get(
-        `/threads/${threadId}/messages`
-      );
-      const assistantMessage = messagesResponse.data.data.find(
-        (msg) => msg.role === "assistant"
-      );
-      if (assistantMessage?.content[0]?.type === "text") {
-        return assistantMessage.content[0].text.value;
-      }
-      throw new Error("Assistant did not return a valid response.");
-    } catch (error) {
-      console.error(
-        "Error in _runAssistantWithPrompt:",
-        error.response?.data || error.message
-      );
-      throw error;
-    }
-  }
-
   /**
-   * Transcribe un archivo de audio usando la API Whisper de OpenAI.
-   * @param {string} audioUri - URI local del archivo de audio (por ejemplo, de expo-av).
-   * @returns {Promise<string>} - Texto transcrito.
+   * Transcribe un archivo de audio de forma segura.
+   * @param {string} audioUri - URI local del archivo de audio.
+   * @returns {Promise<string>} - El texto transcrito.
    */
-  // src/services/OpenAIService.js
-
   async transcribeAudioWhisper(audioUri) {
-    try {
-      const formData = new FormData();
-      formData.append("file", {
-        uri: audioUri,
-        name: "audio.m4a",
-        type: "audio/m4a",
-      });
-      formData.append("model", "whisper-1");
-      formData.append("language", "es");
+    console.log("🎙️ Paso 1: Subiendo audio a Firebase Storage...");
 
-      const response = await axios.post(
-        "https://api.openai.com/v1/audio/transcriptions",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${this.apiKey}`,
-          },
-          timeout: 60000, // <--- AÑADE ESTA LÍNEA (60000 ms = 60 segundos)
-        }
+    try {
+      const response = await fetch(audioUri);
+      const blob = await response.blob();
+
+      const filePath = `transcriptions/${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(7)}.m4a`;
+      const storageRef = ref(this.storage, filePath);
+
+      await uploadBytes(storageRef, blob);
+      console.log("✅ Audio subido correctamente a:", filePath);
+
+      console.log(
+        "☁️ Paso 2: Llamando a la Cloud Function 'transcribeAudio'..."
       );
-      return response.data.text;
+
+      const result = await this.transcribeAudioFunction({ filePath: filePath });
+
+      console.log("🗣️ Transcripción recibida:", result.data.text);
+      return result.data.text;
     } catch (error) {
-      // Este log ahora es más importante que nunca para ver el error real
       console.error(
-        "[OpenAIService] Error transcribiendo audio:",
-        error.toJSON ? error.toJSON() : error
+        `[OpenAIService] Error en el proceso de transcripción (${error.code}):`,
+        error.message
       );
       throw new Error("No se pudo transcribir el audio.");
     }
   }
 }
 
+// Exportamos una única instancia del servicio (patrón Singleton).
 export default new OpenAIService();
