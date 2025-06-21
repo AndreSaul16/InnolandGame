@@ -1,7 +1,7 @@
-#🎮 InnolandGame - Beta Abierta
+🎮 #InnolandGame - Beta Abierta
 Un juego educativo interactivo desarrollado con React Native y Expo que combina aprendizaje con diversión a través de desafíos gamificados y experiencias multijugador. Beta Abierta - Disponible para testing y feedback de la comunidad.
 
-📋 Descripción
+📋 #Descripción
 InnolandGame es una aplicación móvil innovadora que ofrece una experiencia de aprendizaje única mediante:
 
 Sistema de salas multijugador: Crea o únete a salas de juego para competir con otros jugadores.
