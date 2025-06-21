@@ -1,4 +1,4 @@
-🎮 InnolandGame - Beta Abierta
+#🎮 InnolandGame - Beta Abierta
 Un juego educativo interactivo desarrollado con React Native y Expo que combina aprendizaje con diversión a través de desafíos gamificados y experiencias multijugador. Beta Abierta - Disponible para testing y feedback de la comunidad.
 
 📋 Descripción
