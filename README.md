@@ -1,4 +1,5 @@
-🎮 InnolandGame - Beta Abierta
+# 🎮 InnolandGame - Beta Abierta
+
 Un juego educativo interactivo desarrollado con React Native y Expo que combina aprendizaje con diversión a través de desafíos gamificados y experiencias multijugador. Beta Abierta - Disponible para testing y feedback de la comunidad.
 
 InnolandGame es una aplicación móvil innovadora que ofrece una experiencia de aprendizaje única mediante:
@@ -15,7 +16,7 @@ Sistema de puntuación: Magnetos como moneda virtual para incentivar la particip
 
 Interfaz moderna y responsive: Diseño adaptativo que funciona en diferentes tamaños de pantalla.
 
-🎯 Sistema de Juego
+# 🎯 Sistema de Juego
 ✨ RolePicker: Selección entre 10 roles especializados (Experto en IA, Agente Territorial, Inversor Visionario, etc.).
 
 🏠 HomeScreen: Dashboard personalizado con estadísticas y acceso rápido a funciones.
@@ -26,7 +27,7 @@ Interfaz moderna y responsive: Diseño adaptativo que funciona en diferentes tam
 
 📊 ResultsScreen: Análisis detallado de resultados post-partida.
 
-📱 Funcionalidades Técnicas
+# 📱 Funcionalidades Técnicas
 📷 CameraOpener: Escáner QR integrado con detección automática.
 
 🎯 ChallengeUI: Interfaz de desafíos con validación por IA.
