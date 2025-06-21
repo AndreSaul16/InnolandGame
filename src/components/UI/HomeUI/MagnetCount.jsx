@@ -6,7 +6,7 @@ import { COLORS, FONTS } from '../../../theme';
 const MagnetCount = ({ count }) => {
   return (
     <View style={styles.container}>
-      <MaterialCommunityIcons name="magnet" size={40} color="#007AFF" />
+      <MaterialCommunityIcons name="magnet" size={40} color={COLORS.blue} />
       <Text style={styles.count}>{count}</Text>
     </View>
   );

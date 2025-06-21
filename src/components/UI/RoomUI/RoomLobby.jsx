@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList, Dimensions, Modal, Animated, Easing, Alert } from 'react-native';
 import { COLORS, FONTS } from '../../../theme';
-import { listenRoomPlayers, updateRoomStatus, listenToRoomData, takeRole, leaveRoom, deleteRoom } from '../../../services/FirebaseDataService';
+import { listenRoomPlayers, updateRoomStatus, listenToRoomData, takeRole, leaveRoom, deleteRoom, listenRoomRoles } from '../../../services/FirebaseDataService';
 import { useNavigation } from '@react-navigation/native';
 import { XMarkIcon } from 'react-native-heroicons/solid';
 import RoleList from '../RolePicker/RoleList';
@@ -17,32 +17,9 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 const RoomLobby = ({ roomCode, user, isHost, players = [] }) => {
   const navigation = useNavigation();
-  // --- NUEVO: Estado para el modal de roles ---
-  // roleModalStep: null | 'list' | 'detail'
-  const [roleModalStep, setRoleModalStep] = useState(!user?.role ? 'list' : null);
-  const [selectedRoleObj, setSelectedRoleObj] = useState(null); // Objeto de rol seleccionado
-  const [updatingRole, setUpdatingRole] = useState(false);
-  const [rolesState, setRolesState] = useState({});
   const [roomStatus, setRoomStatus] = useState('waiting');
   const [showLeaveModal, setShowLeaveModal] = useState(false);
-
-  // Handler para elegir rol y marcar como listo
-  const handleRoleConfirm = async (roleName) => {
-    setUpdatingRole(true);
-    try {
-      await takeRole(roomCode, roleName, user.uid, user.nombre || user.username || user.email);
-      setRoleModalStep(null); // Cierra el modal
-      setSelectedRoleObj(null);
-    } finally {
-      setUpdatingRole(false);
-    }
-  };
-
-  // Handler para cambiar de rol
-  const handleChangeRole = () => {
-    setRoleModalStep('list');
-    setSelectedRoleObj(null);
-  };
+  const [showRoleModal, setShowRoleModal] = useState(!user?.role);
 
   // Handler para empezar la partida
   const handleStartGame = async () => {
@@ -70,41 +47,23 @@ const RoomLobby = ({ roomCode, user, isHost, players = [] }) => {
     }
   };
 
-  // --- Efecto: Mostrar modal de roles si el usuario no tiene rol ---
+  // --- Efecto: Al entrar al lobby, asegurar que el estado es 'waiting' ---
   useEffect(() => {
-    if (!user?.role) setRoleModalStep('list');
-  }, [user]);
-
-  // --- Efecto: Escuchar roles de la sala ---
-  useEffect(() => {
-    const db = getDatabase();
-    const rolesRef = ref(db, `rooms/${roomCode}/roles`);
-    const unsubscribe = onValue(rolesRef, (snapshot) => {
-      setRolesState(snapshot.val() || {});
-    });
-    return () => off(rolesRef, 'value', unsubscribe);
+    if (!roomCode) return;
+    updateRoomStatus(roomCode, 'waiting');
   }, [roomCode]);
 
-  // --- Efecto: Escuchar estado de la sala ---
+  // --- Efecto: Escuchar estado de la sala y navegar a GameScreen si in_progress ---
   useEffect(() => {
     if (!roomCode) return;
     const unsubscribe = listenToRoomData(roomCode, (roomData) => {
       if (roomData?.status) setRoomStatus(roomData.status);
-    });
-    return () => unsubscribe && unsubscribe();
-  }, [roomCode]);
-
-  // --- Efecto: Navegación automática para invitados si la sala está en progreso ---
-  useEffect(() => {
-    if (isHost) return;
-    if (!roomCode || !user) return;
-    const unsubscribe = listenToRoomData(roomCode, (roomData) => {
       if (roomData?.status === 'in_progress') {
-        navigation.replace('GameScreen', { roomCode, user: { ...user, isHost: false } });
+        navigation.replace('GameScreen', { roomCode, user });
       }
     });
     return () => unsubscribe && unsubscribe();
-  }, [roomCode, user, isHost, navigation]);
+  }, [roomCode, user, navigation]);
 
   // --- Efecto: Listener para detectar cierre de sala por el host ---
   useEffect(() => {
@@ -131,61 +90,45 @@ const RoomLobby = ({ roomCode, user, isHost, players = [] }) => {
     return () => unsubscribe && unsubscribe();
   }, [roomCode, isHost, navigation, user, roomStatus]);
 
+  // Log para saber si el usuario tiene rol
+  useEffect(() => {
+    console.log('[RoomLobby] user:', user);
+    if (!user?.role) {
+      console.log('[RoomLobby] El usuario NO tiene rol. Mostrando modal de selección de rol.');
+      setShowRoleModal(true);
+    } else {
+      console.log('[RoomLobby] El usuario YA tiene rol:', user.role);
+      setShowRoleModal(false);
+    }
+  }, [user?.role]);
+
+  // Handler cuando el usuario confirma un rol
+  const handleRoleConfirmed = (roleName) => {
+    console.log('[RoomLobby] Rol confirmado por el usuario:', roleName);
+    setShowRoleModal(false);
+    // Aquí podrías actualizar el usuario localmente si lo necesitas
+    // O recargar el usuario desde Firebase si tu flujo lo requiere
+  };
+
   // --- Lógica para saber si todos están listos ---
   const allReady = players.length > 0 && players.every(p => p.isReady);
 
   // --- Renderizado ---
   return (
     <View style={styles.container}>
-      {/* Modal único para selección y detalle de roles */}
+      {/* Modal automático de selección de rol */}
       <Modal
-        visible={!!roleModalStep}
+        visible={showRoleModal}
         transparent
         animationType="slide"
-        onRequestClose={() => setRoleModalStep(null)}
+        onRequestClose={() => {}}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[
-            styles.modalBox,
-            {
-              width: Math.min(0.9 * SCREEN_WIDTH, 400),
-              maxHeight: Math.min(0.8 * SCREEN_HEIGHT, 520),
-              padding: SCREEN_WIDTH < 400 ? 12 : 20,
-            },
-          ]}>
-            {roleModalStep === 'list' && (
-              <>
-                <Text style={styles.modalTitle}>Lista de Roles (solo nombres)</Text>
-                <RoleList
-                  roles={PLAYER_ROLES_DATA}
-                  selectedRole={selectedRoleObj ? selectedRoleObj.name : null}
-                  onRoleSelect={(item) => {
-                    setSelectedRoleObj(item);
-                    setRoleModalStep('detail');
-                  }}
-                  rolesSeleccionados={Object.entries(rolesState)
-                    .filter(([_, v]) => v.status === 'taken')
-                    .map(([k]) => k)}
-                  rolesTakenInfo={rolesState}
-                />
-              </>
-            )}
-            {roleModalStep === 'detail' && selectedRoleObj && (
-              <RoleExpandedView
-                role={selectedRoleObj.name}
-                description={selectedRoleObj.description}
-                IconComponent={selectedRoleObj.icon ? require('react-native-heroicons/solid')[selectedRoleObj.icon] : null}
-                onClose={() => {
-                  setRoleModalStep('list');
-                  setSelectedRoleObj(null);
-                }}
-                onConfirm={async () => {
-                  await handleRoleConfirm(selectedRoleObj.name);
-                }}
-                disabled={updatingRole}
-              />
-            )}
-          </View>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
+          <RoleList
+            roomCode={roomCode}
+            user={user}
+            onRoleConfirmed={handleRoleConfirmed}
+          />
         </View>
       </Modal>
       {/* Botón de salir sala */}
@@ -245,7 +188,15 @@ const RoomLobby = ({ roomCode, user, isHost, players = [] }) => {
                 {item.role ? ` - ${item.role}` : ' (Eligiendo rol...)'}
                 {item.isReady ? ' ✅' : ''}
                 {item.uid === user.uid && item.role && (
-                  <Text onPress={handleChangeRole} style={{ color: COLORS.blue, marginLeft: 8, textDecorationLine: 'underline' }}> Cambiar rol</Text>
+                  <Text
+                    onPress={() => {
+                      console.log('[RoomLobby] Usuario pulsa Cambiar rol');
+                      setShowRoleModal(true);
+                    }}
+                    style={{ color: COLORS.blue, marginLeft: 8, textDecorationLine: 'underline', fontWeight: 'bold', fontFamily: FONTS.text }}
+                  >
+                    Cambiar rol
+                  </Text>
                 )}
               </Text>
             )}

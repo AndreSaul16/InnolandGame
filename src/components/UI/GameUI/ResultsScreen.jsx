@@ -1,11 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
-import { listenGameState, getUsersTotalMagnetos } from '../../../services/FirebaseDataService';
+import React, { useEffect, useState, useRef } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  Animated, 
+  Platform,
+  StatusBar,
+  ScrollView,
+  Alert
+} from 'react-native';
+import { listenGameState, getUsersTotalMagnetos, deleteRoom } from '../../../services/FirebaseDataService';
 import ScoreBoard from './ScoreBoard';
 import { COLORS, FONTS } from '../../../theme';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { saveLastGameForUser } from '../../../services/FirebaseDataService';
+import { saveLastGameWithTurn } from '../../../services/FirebaseDataService';
 import { getAuth } from 'firebase/auth';
+import {
+  TrophyIcon,
+  HomeIcon,
+  StarIcon,
+  FireIcon
+} from 'react-native-heroicons/solid';
+import useScreenSize, { getScrollViewStyles } from '../../../utils/useScreenSize';
+import { useContext } from 'react';
+import { UserContext } from '../../../context/UserContext';
 
 // ResultsScreen.jsx
 // Muestra las puntuaciones finales y el ganador. Permite volver al menú principal.
@@ -17,6 +36,16 @@ const ResultsScreen = (props) => {
   const [gameState, setGameState] = useState(null);
   const [lastGameSaved, setLastGameSaved] = useState(false);
   const [totalMagnetos, setTotalMagnetos] = useState({});
+  const screenData = useScreenSize();
+  const scrollStyles = getScrollViewStyles(screenData.needsScroll);
+  const { setRoomCode, setUserRole } = useContext(UserContext);
+  const [wasGameState, setWasGameState] = useState(false);
+
+  // Animaciones
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const trophyRotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     console.log('[ResultsScreen] useEffect montado, roomCode:', roomCode);
@@ -24,9 +53,62 @@ const ResultsScreen = (props) => {
     const unsubscribe = listenGameState(roomCode, (state) => {
       console.log('[ResultsScreen] Estado de juego recibido:', state);
       setGameState(state);
+      if (state) setWasGameState(true);
+      // Si la sala fue eliminada y ya habíamos recibido gameState antes, redirigir a Home
+      if (!state && wasGameState) {
+        Alert.alert(
+          'Partida finalizada',
+          'El anfitrión ha cerrado la sala. Serás redirigido al menú principal.',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.replace('Home', { user })
+            }
+          ],
+          { cancelable: false }
+        );
+      }
     });
     return () => unsubscribe();
-  }, [roomCode]);
+  }, [roomCode, navigation, user, wasGameState]);
+
+  // Animación de entrada
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 60,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      })
+    ]).start();
+
+    // Animación del trofeo
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(trophyRotateAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(trophyRotateAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: true,
+        })
+      ])
+    ).start();
+  }, []);
 
   // Guardar la última partida automáticamente cuando gameState esté disponible
   useEffect(() => {
@@ -62,7 +144,7 @@ const ResultsScreen = (props) => {
       magnetosPartida: magnetosPartida,
       // Puedes añadir más campos si lo deseas
     };
-    saveLastGameForUser(uid, lastGameData)
+    saveLastGameWithTurn(uid, roomCode, lastGameData)
       .then(() => {
         setLastGameSaved(true);
         console.log('[ResultsScreen] Última partida guardada correctamente:', lastGameData);
@@ -81,9 +163,12 @@ const ResultsScreen = (props) => {
 
   if (!gameState) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.loadingText}>Cargando resultados...</Text>
-      </View>
+      <Animated.View style={[styles.loadingContainer, { opacity: fadeAnim }]}>
+        <View style={styles.loadingContent}>
+          <TrophyIcon size={64} color={COLORS.primary} />
+          <Text style={styles.loadingText}>Calculando resultados...</Text>
+        </View>
+      </Animated.View>
     );
   }
 
@@ -93,74 +178,299 @@ const ResultsScreen = (props) => {
   const winner = sortedPlayers[0];
   const winnerScore = winner.magnetos || 0;
 
+  // Interpolación para rotación del trofeo
+  const trophyRotation = trophyRotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['-5deg', '5deg'],
+  });
+
+  // Botón de volver al menú como componente reutilizable
+  const ReturnHomeButton = ({ onPress }) => (
+    <TouchableOpacity
+      style={styles.homeButton}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <HomeIcon size={24} color={COLORS.white} />
+      <Text style={styles.homeButtonText}>Volver al Menú</Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>¡Partida finalizada!</Text>
-      <Text style={styles.winnerText}>
-        Ganador: <Text style={styles.winnerName}>{winner.nombre}</Text> 🏆
-      </Text>
-      <Text style={styles.winnerScore}>Magnetos en partida: {winnerScore}</Text>
-      <ScoreBoard
-        players={players}
-        currentTurnUid={null}
-      />
-      <Button
-        title="Volver al menú principal"
-        color={COLORS.primary}
-        onPress={() => {
-          console.log('[ResultsScreen] Botón volver al menú principal pulsado');
-          navigation.replace('Home', { user });
-        }}
-      />
-    </View>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+      <View style={styles.outerWebContainer}>
+        <View style={styles.scrollWebContent}>
+          {/* Header celebratorio */}
+          <Animated.View style={[
+            styles.celebrationHeader,
+            { transform: [{ translateY: slideAnim }, { scale: scaleAnim }] }
+          ]}>
+            <View style={styles.confetti}>
+              <StarIcon size={20} color={COLORS.primary} />
+              <StarIcon size={16} color={COLORS.blue} />
+              <StarIcon size={18} color={COLORS.primary} />
+            </View>
+            <Animated.View style={{ transform: [{ rotate: trophyRotation }] }}>
+              <TrophyIcon size={80} color={COLORS.primary} />
+            </Animated.View>
+            <Text style={styles.celebrationTitle}>¡Partida Finalizada!</Text>
+            <View style={styles.confetti}>
+              <StarIcon size={18} color={COLORS.blue} />
+              <StarIcon size={16} color={COLORS.primary} />
+              <StarIcon size={20} color={COLORS.blue} />
+            </View>
+          </Animated.View>
+          {/* Ganador destacado */}
+          <Animated.View style={[
+            styles.winnerCard,
+            { transform: [{ scale: scaleAnim }] }
+          ]}>
+            <View style={styles.winnerHeader}>
+              <TrophyIcon size={32} color={COLORS.primary} />
+              <Text style={styles.winnerLabel}>GANADOR</Text>
+            </View>
+            <Text style={styles.winnerName}>{winner.nombre}</Text>
+            <View style={styles.winnerScoreContainer}>
+              <FireIcon size={24} color={COLORS.primary} />
+              <Text style={styles.winnerScore}>{winnerScore} magnetos</Text>
+            </View>
+          </Animated.View>
+          {/* Scoreboard */}
+          <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
+            <ScoreBoard
+              players={players}
+              currentTurnUid={null}
+            />
+          </Animated.View>
+        </View>
+        {/* Botón de regreso siempre visible al final */}
+        <Animated.View style={[
+          styles.buttonContainer,
+          { transform: [{ translateY: slideAnim }] }
+        ]}>
+          <ReturnHomeButton
+            onPress={async () => {
+              console.log('[ResultsScreen] Botón volver al menú principal pulsado');
+              if (roomCode) {
+                try {
+                  await deleteRoom(roomCode);
+                } catch (e) {
+                  console.warn('No se pudo eliminar la sala:', e);
+                }
+              }
+              setRoomCode(null);
+              setUserRole(null);
+              navigation.replace('Home', { user });
+            }}
+          />
+        </Animated.View>
+      </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: COLORS.white,
-    padding: 16,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
   },
-  centered: {
+
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.white,
   },
-  title: {
-    fontSize: 28,
+
+  loadingContent: {
+    alignItems: 'center',
+    padding: 32,
+  },
+
+  loadingText: {
+    marginTop: 16,
+    fontSize: 18,
+    color: COLORS.darkBlue,
+    fontFamily: FONTS.text,
+    fontWeight: '500',
+  },
+
+  celebrationHeader: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    paddingHorizontal: 20,
+  },
+
+  confetti: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+
+  celebrationTitle: {
+    fontSize: 32,
+    fontFamily: FONTS.title,
+    fontWeight: 'bold',
+    color: COLORS.darkBlue,
+    textAlign: 'center',
+    marginTop: 16,
+    letterSpacing: 1,
+  },
+
+  winnerCard: {
+    backgroundColor: COLORS.primary + '15',
+    borderRadius: 24,
+    padding: 24,
+    marginHorizontal: 20,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    alignItems: 'center',
+    ...Platform.select({
+      web: {
+        boxShadow: `0 8px 24px ${COLORS.primary}30`,
+      },
+      default: {
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.2,
+        shadowRadius: 24,
+        elevation: 8,
+      },
+    }),
+  },
+
+  winnerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+
+  winnerLabel: {
+    fontFamily: FONTS.title,
+    fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.primary,
-    fontFamily: FONTS.title,
-    marginBottom: 16,
-    textAlign: 'center',
+    letterSpacing: 2,
   },
-  winnerText: {
-    fontSize: 20,
-    color: COLORS.success,
-    fontFamily: FONTS.title,
-    marginBottom: 4,
-    textAlign: 'center',
-  },
+
   winnerName: {
+    fontSize: 28,
+    fontFamily: FONTS.title,
     fontWeight: 'bold',
     color: COLORS.darkBlue,
-  },
-  winnerScore: {
-    fontSize: 18,
-    color: COLORS.blue,
-    fontFamily: FONTS.text,
-    marginBottom: 16,
     textAlign: 'center',
+    marginBottom: 16,
   },
-  loadingText: {
-    fontSize: 18,
-    color: COLORS.darkBlue,
+
+  winnerScoreContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    gap: 8,
+    ...Platform.select({
+      web: {
+        boxShadow: `0 4px 12px ${COLORS.primary}20`,
+      },
+      default: {
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 4,
+      },
+    }),
+  },
+
+  winnerScore: {
+    fontSize: 20,
     fontFamily: FONTS.text,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+  },
+
+  buttonContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 32,
+    paddingTop: 16,
+    backgroundColor: COLORS.white,
+    ...Platform.select({
+      web: {
+        position: 'sticky',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+      },
+    }),
+  },
+
+  homeButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    ...Platform.select({
+      web: {
+        boxShadow: `0 4px 12px ${COLORS.primary}40`,
+      },
+      default: {
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+        elevation: 6,
+      },
+    }),
+  },
+
+  homeButtonText: {
+    color: COLORS.white,
+    fontFamily: FONTS.text,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+
+  mainContent: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  contentArea: {
+    flex: 1,
+  },
+
+  outerWebContainer: {
+    flex: 1,
+    ...Platform.select({
+      web: {
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+      },
+    }),
+  },
+  scrollWebContent: {
+    flex: 1,
+    ...Platform.select({
+      web: {
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        maxHeight: 'calc(100vh - 96px)',
+        paddingBottom: 32,
+      },
+    }),
   },
 });
 
-export default ResultsScreen; 
+export default ResultsScreen;

@@ -5,10 +5,14 @@ import { createStackNavigator } from '@react-navigation/stack';
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import LoginScreen from './src/components/UI/LoginUI/LoginScreen';
-import RegisterScreen from './src/components/UI/LoginUI/RegisterScreen';
-import ChallengeManager from './src/components/UI/ChallengeManager';
 import HomeScreen from './src/components/UI/HomeUI/HomeScreen';
-import userDemo from './src/data/userDemo.json';
+import RegisterScreen from './src/components/UI/LoginUI/RegisterScreen';
+import RoomScreen from './src/components/UI/RoomUI/RoomScreen';
+import GameScreen from './src/components/UI/GameUI/GameScreen';
+import CameraScreen from './src/components/UI/GameUI/CameraScreen';
+import ChallengeUI from './src/components/UI/ChallengeUI';
+import ResultsScreen from './src/components/UI/GameUI/ResultsScreen';
+import { UserProvider } from './src/context/UserContext';
 
 const Stack = createStackNavigator();
 
@@ -48,21 +52,21 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="LoginScreen" component={LoginScreen} />
-          <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
-          <Stack.Screen name="ChallengeManager">
-            {props => <ChallengeManager {...props} user={userDemo} />}
-          </Stack.Screen>
-          <Stack.Screen 
-            name="Home" 
-            children={props => <HomeScreen {...props} user={userDemo} />}
-            initialParams={{ user: userDemo }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <UserProvider>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName="LoginScreen" screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="LoginScreen" component={LoginScreen} />
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+            <Stack.Screen name="RoomScreen" component={RoomScreen} />
+            <Stack.Screen name="GameScreen" component={GameScreen} />
+            <Stack.Screen name="CameraScreen" component={CameraScreen} />
+            <Stack.Screen name="ChallengeUI" component={ChallengeUI} />
+            <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </UserProvider>
   );
 }

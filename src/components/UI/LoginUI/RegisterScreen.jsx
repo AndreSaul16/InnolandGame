@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { registerUser } from '../../../services/UserService';
+import { registerUser } from '../../../services/FirebaseDataService';
 import { showAlert } from '../../../utils/showAlert';
+import { COLORS, FONTS } from '../../../theme';
 
 const RegisterScreen = () => {
   const navigation = useNavigation();
@@ -59,28 +60,37 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: 24,
+    backgroundColor: COLORS.white,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 24,
+    color: COLORS.darkBlue,
+    fontFamily: FONTS.title,
+    letterSpacing: 1,
   },
   input: {
     width: '100%',
-    height: 40,
-    borderColor: '#ccc',
+    height: 44,
+    borderColor: COLORS.gray,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 10,
     marginBottom: 16,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.white,
+    fontFamily: FONTS.text,
+    fontSize: 16,
+    color: COLORS.darkBlue,
   },
   loginText: {
     marginTop: 16,
-    color: '#007bff',
+    color: COLORS.blue,
     textDecorationLine: 'underline',
+    fontFamily: FONTS.text,
+    fontSize: 16,
   },
 });
 
-export default RegisterScreen; 
+export default RegisterScreen;

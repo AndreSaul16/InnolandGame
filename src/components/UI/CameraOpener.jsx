@@ -1,12 +1,26 @@
 import React from 'react';
 // 1. Importamos las herramientas que necesitamos de React Native.
-import { View, Text, Platform, Button, TouchableOpacity, StyleSheet, StatusBar as RNStatusBar } from 'react-native';
+import { 
+  View, 
+  Text, 
+  Platform, 
+  TouchableOpacity, 
+  StyleSheet, 
+  StatusBar as RNStatusBar,
+  Animated,
+  ActivityIndicator
+} from 'react-native';
 // `StatusBar` de Expo nos da más control sobre la barra de estado.
 import { StatusBar } from 'expo-status-bar';
 // Componentes específicos para la funcionalidad de la cámara.
 import { CameraView, useCameraPermissions } from 'expo-camera';
-// Un icono para el botón de cerrar, de una librería externa.
-import { XMarkIcon } from "react-native-heroicons/solid";
+// Iconos modernos para una mejor experiencia visual
+import { 
+  XMarkIcon, 
+  CameraIcon, 
+  QrCodeIcon,
+  ArrowPathIcon 
+} from "react-native-heroicons/solid";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, FONTS } from '../../theme';
 
@@ -16,6 +30,52 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
   // - `permission`: un objeto con el estado actual del permiso de la cámara.
   // - `requestPermission`: una función para solicitar el permiso al usuario.
   const [permission, requestPermission] = useCameraPermissions();
+  
+  // Animaciones para mejorar la experiencia visual
+  const scanAnimation = React.useRef(new Animated.Value(0)).current;
+  const pulseAnimation = React.useRef(new Animated.Value(1)).current;
+
+  // Iniciamos las animaciones cuando el componente se monta
+  React.useEffect(() => {
+    // Animación de escaneo continua
+    const startScanAnimation = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(scanAnimation, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scanAnimation, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    };
+
+    // Animación de pulso para el botón de cerrar
+    const startPulseAnimation = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnimation, {
+            toValue: 1.1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnimation, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    };
+
+    startScanAnimation();
+    startPulseAnimation();
+  }, []);
 
   // `useEffect` ejecuta este código cada vez que el estado de `permission` cambia.
   React.useEffect(() => {
@@ -117,6 +177,7 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
       if (onClose) onClose();
     };
 
+    // Versión web moderna con diseño mejorado
     return (
       <div style={{
         position: 'relative',
@@ -125,16 +186,52 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
         maxWidth: 400,
         maxHeight: 400,
         margin: '40px auto',
-        background: 'black',
-        borderRadius: 16,
+        background: COLORS.black,
+        borderRadius: 24,
         overflow: 'hidden',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+        boxShadow: `0 8px 32px rgba(0, 0, 0, 0.3)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        border: `3px solid ${COLORS.primary}`,
       }}>
         {error ? (
-          <p style={{ color: 'red', textAlign: 'center', width: '100%' }}>{error}</p>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 32,
+            textAlign: 'center',
+          }}>
+            <CameraIcon style={{ width: 48, height: 48, color: COLORS.error, marginBottom: 16 }} />
+            <p style={{ 
+              color: COLORS.error, 
+              fontSize: 18, 
+              fontFamily: FONTS.text,
+              margin: 0,
+              marginBottom: 16
+            }}>
+              {error}
+            </p>
+            <button
+              onClick={handleRetry}
+              style={{
+                backgroundColor: COLORS.primary,
+                color: COLORS.darkBlue,
+                border: 'none',
+                borderRadius: 12,
+                padding: '12px 24px',
+                fontSize: 16,
+                fontWeight: 'bold',
+                fontFamily: FONTS.text,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Reintentar
+            </button>
+          </div>
         ) : (
           <>
             <video
@@ -144,32 +241,73 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
               muted
             />
             <canvas ref={canvasRef} style={{ display: 'none' }} />
-            {/* Botón de cerrar */}
+            
+            {/* Marco de escaneo visual */}
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 200,
+              height: 200,
+              border: `3px solid ${COLORS.primary}`,
+              borderRadius: 16,
+              backgroundColor: 'rgba(0, 234, 189, 0.1)',
+              zIndex: 5,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+            }}>
+              <QrCodeIcon style={{ width: 40, height: 40, color: COLORS.primary, marginBottom: 8 }} />
+              <p style={{
+                color: COLORS.primary,
+                fontSize: 14,
+                fontFamily: FONTS.text,
+                margin: 0,
+                textAlign: 'center',
+                fontWeight: 'bold',
+              }}>
+                Apunta al código QR
+              </p>
+            </div>
+
+            {/* Botón de cerrar mejorado */}
             <button
               onClick={handleClose}
               style={{
                 position: 'absolute',
                 top: 16,
                 right: 16,
-                background: 'rgba(220,38,38,0.8)',
+                background: `linear-gradient(135deg, ${COLORS.error} 0%, #b91c1c 100%)`,
                 border: 'none',
                 borderRadius: '50%',
-                width: 40,
-                height: 40,
-                color: 'white',
-                fontSize: 24,
+                width: 48,
+                height: 48,
+                color: COLORS.white,
+                fontSize: 20,
                 cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                boxShadow: '0 4px 16px rgba(220, 38, 38, 0.4)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 zIndex: 10,
+                transition: 'all 0.2s ease',
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'scale(1.1)';
+                e.target.style.boxShadow = '0 6px 20px rgba(220, 38, 38, 0.6)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'scale(1)';
+                e.target.style.boxShadow = '0 4px 16px rgba(220, 38, 38, 0.4)';
               }}
               aria-label="Cerrar"
             >
               ×
             </button>
-            {/* Overlay de escaneado */}
+
+            {/* Overlay de procesamiento mejorado */}
             {!scanning && (
               <div style={{
                 position: 'absolute',
@@ -177,43 +315,134 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
                 left: 0,
                 right: 0,
                 padding: 32,
-                background: 'rgba(0,0,0,0.5)',
-                color: 'white',
+                background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%)`,
+                color: COLORS.white,
                 textAlign: 'center',
                 zIndex: 10,
+                borderBottomLeftRadius: 21,
+                borderBottomRightRadius: 21,
               }}>
-                <div style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>Procesando...</div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 16,
+                }}>
+                  <div style={{
+                    width: 20,
+                    height: 20,
+                    border: `3px solid ${COLORS.primary}`,
+                    borderTop: '3px solid transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                    marginRight: 12,
+                  }}></div>
+                  <div style={{ 
+                    fontSize: 18, 
+                    fontWeight: 'bold', 
+                    fontFamily: FONTS.title,
+                    color: COLORS.primary
+                  }}>
+                    Procesando código QR...
+                  </div>
+                </div>
                 <button
                   onClick={handleRetry}
                   style={{
-                    background: '#007bff',
-                    color: 'white',
+                    background: `linear-gradient(135deg, ${COLORS.blue} 0%, ${COLORS.darkBlue} 100%)`,
+                    color: COLORS.white,
                     border: 'none',
-                    borderRadius: 8,
-                    padding: '8px 16px',
+                    borderRadius: 12,
+                    padding: '12px 24px',
                     fontSize: 16,
+                    fontWeight: 'bold',
+                    fontFamily: FONTS.text,
                     cursor: 'pointer',
+                    transition: 'all 0.2s ease',
                   }}
-                >Escanear de Nuevo</button>
+                  onMouseOver={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = `0 6px 20px rgba(0, 92, 255, 0.4)`;
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                >
+                  Escanear de Nuevo
+                </button>
               </div>
             )}
+
+            {/* Añadimos la animación CSS para el spinner */}
+            <style>{`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}</style>
           </>
         )}
       </div>
     );
   }
+
   // Caso 2: Si todavía estamos esperando la respuesta del sistema sobre los permisos.
   if (!permission) {
-    return <Text style={styles.infoText}>Verificando permisos...</Text>;
+    return (
+      <View style={styles.loadingContainer}>
+        <View style={styles.loadingCard}>
+          <ActivityIndicator 
+            size="large" 
+            color={COLORS.primary} 
+            style={styles.spinner}
+          />
+          <CameraIcon size={48} color={COLORS.primary} style={styles.loadingIcon} />
+          <Text style={styles.loadingTitle}>Verificando permisos</Text>
+          <Text style={styles.loadingSubtitle}>
+            Configurando acceso a la cámara...
+          </Text>
+        </View>
+      </View>
+    );
   }
+
   // Caso 3: Si sabemos que el permiso NO está concedido.
   if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
-        <Text style={styles.permissionText}>
-          Necesitamos acceso a tu cámara para escanear códigos QR
-        </Text>
-        <Button title="Permitir cámara" onPress={requestPermission} />
+        <View style={styles.permissionCard}>
+          <View style={styles.permissionIconContainer}>
+            <CameraIcon size={64} color={COLORS.primary} />
+          </View>
+          
+          <Text style={styles.permissionTitle}>
+            Acceso a la Cámara
+          </Text>
+          
+          <Text style={styles.permissionText}>
+            Necesitamos acceso a tu cámara para escanear códigos QR y continuar con el juego
+          </Text>
+          
+          <View style={styles.permissionFeatures}>
+            <View style={styles.featureItem}>
+              <QrCodeIcon size={20} color={COLORS.blue} />
+              <Text style={styles.featureText}>Escaneo de códigos QR</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <CameraIcon size={20} color={COLORS.blue} />
+              <Text style={styles.featureText}>Acceso seguro a la cámara</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.permissionButton}
+            onPress={requestPermission}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.permissionButtonText}>Permitir Cámara</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -236,24 +465,75 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
           }}
         />
         
-        {/* Botón para cerrar la cámara (la 'X'). */}
-        <TouchableOpacity
-          onPress={onClose}
-          style={styles.closeButton}
-          activeOpacity={0.7} // Controla la opacidad al pulsar.
-        >
-          <XMarkIcon size={28} color="white" />
-        </TouchableOpacity>
+        {/* Marco de escaneo animado */}
+        <View style={styles.scanFrame}>
+          <View style={styles.scanCorners}>
+            <View style={[styles.corner, styles.topLeft]} />
+            <View style={[styles.corner, styles.topRight]} />
+            <View style={[styles.corner, styles.bottomLeft]} />
+            <View style={[styles.corner, styles.bottomRight]} />
+          </View>
+          
+          <Animated.View 
+            style={[
+              styles.scanLine,
+              {
+                transform: [{
+                  translateY: scanAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-100, 100],
+                  })
+                }]
+              }
+            ]}
+          />
+          
+          <View style={styles.scanInstruction}>
+            <QrCodeIcon size={32} color={COLORS.primary} />
+            <Text style={styles.scanInstructionText}>
+              Centra el código QR en el marco
+            </Text>
+          </View>
+        </View>
         
-        {/* Este overlay solo se muestra si `isScanned` es verdadero. */}
+        {/* Botón para cerrar la cámara mejorado */}
+        <Animated.View
+          style={[
+            styles.closeButtonContainer,
+            { transform: [{ scale: pulseAnimation }] }
+          ]}
+        >
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeButton}
+            activeOpacity={0.8}
+          >
+            <XMarkIcon size={28} color={COLORS.white} />
+          </TouchableOpacity>
+        </Animated.View>
+        
+        {/* Overlay de procesamiento mejorado */}
         {isScanned && (
           <View style={styles.scannedOverlay}>
-            <Text style={styles.scannedOverlayText}>Procesando...</Text>
-            <Button 
-              title="Escanear de Nuevo" 
-              onPress={onRetryScan}
-              color="#007bff"
-            />
+            <View style={styles.scannedCard}>
+              <ActivityIndicator 
+                size="large" 
+                color={COLORS.primary} 
+                style={styles.processingSpinner}
+              />
+              
+              <Text style={styles.scannedTitle}>¡Código detectado!</Text>
+              <Text style={styles.scannedSubtitle}>Procesando información...</Text>
+              
+              <TouchableOpacity 
+                style={styles.retryButton}
+                onPress={onRetryScan}
+                activeOpacity={0.8}
+              >
+                <ArrowPathIcon size={20} color={COLORS.white} style={styles.retryIcon} />
+                <Text style={styles.retryButtonText}>Escanear de Nuevo</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       </SafeAreaView>
@@ -261,79 +541,344 @@ const CameraOpener = ({ onBarCodeScanned, onPermissionError, isScanned, onRetryS
   );
 };
 
-// --- DEFINICIÓN DE ESTILOS ---
-// Aquí se traducen todas las clases de Tailwind a objetos de estilo de React Native.
+// --- DEFINICIÓN DE ESTILOS MODERNOS ---
 const styles = StyleSheet.create({
-  // Estilo para los textos informativos (ej. "Verificando permisos...").
-  infoText: {
-    textAlign: 'center',    // Centra el texto horizontalmente.
-    marginTop: 48,          // Margen superior para separarlo del borde.
-    fontSize: 18,           // Tamaño de la fuente.
-    fontFamily: FONTS.text,
-    color: COLORS.darkBlue,
-  },
-  // Contenedor para la pantalla de solicitud de permisos.
-  permissionContainer: {
-    flex: 1,                // Ocupa todo el espacio disponible.
-    justifyContent: 'center', // Centra el contenido verticalmente.
-    alignItems: 'center',   // Centra el contenido horizontalmente.
-    padding: 20,            // Espaciado interior.
-    backgroundColor: 'white', // Color de fondo.
-  },
-  // Estilo para el texto en la pantalla de permisos.
-  permissionText: {
-    textAlign: 'center',    // Centra el texto.
-    marginBottom: 20,       // Margen inferior para separarlo del botón.
-    fontSize: 18,           // Tamaño de la fuente.
-    fontFamily: FONTS.text,
-    color: COLORS.darkBlue,
-  },
-  // Contenedor principal para la vista de la cámara.
-  cameraContainer: {
-    flex: 1,                // Ocupa todo el espacio disponible.
-    backgroundColor: 'black', // Fondo negro, visible mientras la cámara inicia.
-    // Añadimos el padding superior en Android para evitar el solapamiento con la barra de estado.
-    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
-  },
-  // Estilo para el botón de cerrar.
-  closeButton: {
-    position: 'absolute',
-    zIndex: 10,
-    top: 56,
-    right: 20,
-    backgroundColor: COLORS.primary,
-    borderRadius: 9999,
-    width: 48,
-    height: 48,
+  // Contenedor de carga mejorado
+  loadingContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // Sombra solo en móvil
-    ...(Platform.OS !== 'web' ? {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 8,
-    } : {}),
+    backgroundColor: COLORS.white,
+    padding: 20,
   },
-  // Overlay que aparece después de escanear.
-  scannedOverlay: {
-    position: 'absolute',   // Posicionamiento absoluto.
-    zIndex: 10,             // Asegura que esté por encima de la cámara.
-    bottom: 0,              // Lo fija al borde inferior.
-    left: 0,                // Lo fija al borde izquierdo.
-    right: 0,               // Lo fija al borde derecho.
-    padding: 40,            // Espaciado interior grande.
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo negro con 50% de opacidad.
-    alignItems: 'center',   // Centra su contenido (texto y botón) horizontalmente.
+  loadingCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 24,
+    padding: 40,
+    alignItems: 'center',
+    ...Platform.select({
+      web: {
+        boxShadow: '0 8px 32px rgba(0, 0, 135, 0.15)',
+      },
+      default: {
+        shadowColor: COLORS.darkBlue,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 16,
+        elevation: 16,
+      },
+    }),
   },
-  // Texto dentro del overlay.
-  scannedOverlayText: {
-    color: 'white',         // Color del texto.
-    fontSize: 20,           // Tamaño de la fuente.
-    fontWeight: 'bold',     // Texto en negrita.
-    marginBottom: 16,       // Margen inferior para separarlo del botón.
+  spinner: {
+    marginBottom: 20,
+  },
+  loadingIcon: {
+    marginBottom: 16,
+  },
+  loadingTitle: {
+    fontSize: 24,
+    fontFamily: FONTS.title,
+    fontWeight: 'bold',
+    color: COLORS.darkBlue,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  loadingSubtitle: {
+    fontSize: 16,
     fontFamily: FONTS.text,
+    color: COLORS.gray,
+    textAlign: 'center',
+  },
+
+  // Contenedor de permisos mejorado
+  permissionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    padding: 20,
+  },
+  permissionCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 24,
+    padding: 32,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 400,
+    ...Platform.select({
+      web: {
+        boxShadow: '0 12px 40px rgba(0, 0, 135, 0.2)',
+      },
+      default: {
+        shadowColor: COLORS.darkBlue,
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.2,
+        shadowRadius: 20,
+        elevation: 20,
+      },
+    }),
+  },
+  permissionIconContainer: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: `${COLORS.primary}20`,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  permissionTitle: {
+    fontSize: 28,
+    fontFamily: FONTS.title,
+    fontWeight: 'bold',
+    color: COLORS.darkBlue,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  permissionText: {
+    fontSize: 16,
+    fontFamily: FONTS.text,
+    color: COLORS.gray,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  permissionFeatures: {
+    width: '100%',
+    marginBottom: 32,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingLeft: 8,
+  },
+  featureText: {
+    fontSize: 14,
+    fontFamily: FONTS.text,
+    color: COLORS.darkBlue,
+    marginLeft: 12,
+  },
+  permissionButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    width: '100%',
+    alignItems: 'center',
+    ...Platform.select({
+      web: {
+        boxShadow: '0 4px 16px rgba(0, 234, 189, 0.3)',
+      },
+      default: {
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+      },
+    }),
+  },
+  permissionButtonText: {
+    fontSize: 18,
+    fontFamily: FONTS.text,
+    fontWeight: 'bold',
+    color: COLORS.darkBlue,
+  },
+
+  // Contenedor principal de la cámara
+  cameraContainer: {
+    flex: 1,
+    backgroundColor: COLORS.black,
+    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
+  },
+
+  // Marco de escaneo moderno
+  scanFrame: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    width: 240,
+    height: 240,
+    marginTop: -120,
+    marginLeft: -120,
+    zIndex: 5,
+  },
+  scanCorners: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  corner: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    borderColor: COLORS.primary,
+    borderWidth: 4,
+  },
+  topLeft: {
+    top: 0,
+    left: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
+    borderTopLeftRadius: 12,
+  },
+  topRight: {
+    top: 0,
+    right: 0,
+    borderLeftWidth: 0,
+    borderBottomWidth: 0,
+    borderTopRightRadius: 12,
+  },
+  bottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderRightWidth: 0,
+    borderTopWidth: 0,
+    borderBottomLeftRadius: 12,
+  },
+  bottomRight: {
+    bottom: 0,
+    right: 0,
+    borderLeftWidth: 0,
+    borderTopWidth: 0,
+    borderBottomRightRadius: 12,
+  },
+  scanLine: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    height: 3,
+    backgroundColor: COLORS.primary,
+    borderRadius: 2,
+    opacity: 0.8,
+  },
+  scanInstruction: {
+    position: 'absolute',
+    bottom: -80,
+    left: -40,
+    right: -40,
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 16,
+    padding: 16,
+  },
+  scanInstructionText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontFamily: FONTS.text,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+
+  // Botón de cerrar mejorado
+  closeButtonContainer: {
+    position: 'absolute',
+    top: 56,
+    right: 20,
+    zIndex: 10,
+  },
+  closeButton: {
+    backgroundColor: COLORS.error,
+    borderRadius: 25,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Platform.select({
+      web: {
+        boxShadow: '0 4px 16px rgba(220, 38, 38, 0.4)',
+      },
+      default: {
+        shadowColor: COLORS.error,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 8,
+        elevation: 8,
+      },
+    }),
+  },
+
+  // Overlay de procesamiento moderno
+  scannedOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 15,
+  },
+  scannedCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 24,
+    padding: 32,
+    alignItems: 'center',
+    marginHorizontal: 20,
+    minWidth: 280,
+    ...Platform.select({
+      web: {
+        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.3)',
+      },
+      default: {
+        shadowColor: COLORS.black,
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        elevation: 20,
+      },
+    }),
+  },
+  processingSpinner: {
+    marginBottom: 20,
+  },
+  scannedTitle: {
+    fontSize: 24,
+    fontFamily: FONTS.title,
+    fontWeight: 'bold',
+    color: COLORS.darkBlue,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  scannedSubtitle: {
+    fontSize: 16,
+    fontFamily: FONTS.text,
+    color: COLORS.gray,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  retryButton: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.blue,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    ...Platform.select({
+      web: {
+        boxShadow: '0 4px 16px rgba(0, 92, 255, 0.3)',
+      },
+      default: {
+        shadowColor: COLORS.blue,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+      },
+    }),
+  },
+  retryIcon: {
+    marginRight: 8,
+  },
+  retryButtonText: {
+    fontSize: 16,
+    fontFamily: FONTS.text,
+    fontWeight: 'bold',
+    color: COLORS.white,
   },
 });
 

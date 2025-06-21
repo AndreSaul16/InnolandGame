@@ -9,7 +9,7 @@ import { validateChallengeAnswer } from '../challenges/ValidationChallenge';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import { View } from 'react-native';
-import OfflineCardModal from './OfflineCardModal';
+import OfflineCardModal from './GameUI/OfflineCardModal';
 import { addMagnetosToPlayerInRoom } from '../../services/FirebaseDataService';
 
 export default function UIController() {

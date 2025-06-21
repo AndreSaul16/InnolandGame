@@ -2,10 +2,10 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { COLORS, FONTS } from '../../../theme';
 
-const StartGameButton = ({ onPress }) => {
+const StartGameButton = ({ onPress, text = 'Empezar Partida' }) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Text style={styles.buttonText}>Empezar Partida</Text>
+      <Text style={styles.buttonText}>{text}</Text>
     </TouchableOpacity>
   );
 };

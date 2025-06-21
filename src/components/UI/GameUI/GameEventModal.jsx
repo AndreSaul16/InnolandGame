@@ -1,9 +1,45 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
 import { COLORS, FONTS } from '../../../theme';
 
 const GameEventModal = ({ visible, event, onClose }) => {
-  if (!event) return null;
+  const [pressing, setPressing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef(null);
+  const intervalRef = useRef(null);
+
+  const LONG_PRESS_DURATION = 2000; // 5 segundos
+
+  const handlePressIn = () => {
+    setPressing(true);
+    setProgress(0);
+    const start = Date.now();
+    intervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - start;
+      setProgress(Math.min(elapsed / LONG_PRESS_DURATION, 1));
+    }, 50);
+    timerRef.current = setTimeout(() => {
+      setPressing(false);
+      setProgress(1);
+      clearInterval(intervalRef.current);
+      onClose();
+    }, LONG_PRESS_DURATION);
+  };
+
+  const handlePressOut = () => {
+    setPressing(false);
+    setProgress(0);
+    clearTimeout(timerRef.current);
+    clearInterval(intervalRef.current);
+  };
+
+  if (!event) {
+    console.log('[LOG][GameEventModal] No hay evento para mostrar, el modal no se renderiza.');
+    return null;
+  }
+  if (visible) {
+    console.log('[LOG][GameEventModal] Modal visible, mostrando evento:', event);
+  }
   return (
     <Modal
       visible={visible}
@@ -15,8 +51,23 @@ const GameEventModal = ({ visible, event, onClose }) => {
         <View style={styles.box}>
           <Text style={styles.title}>{event.title}</Text>
           <Text style={styles.description}>{event.description}</Text>
-          <Pressable style={styles.button} onPress={onClose}>
-            <Text style={styles.buttonText}>Aceptar</Text>
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              pressing && styles.buttonPressing,
+              pressed && { opacity: 0.8 },
+            ]}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+          >
+            <Text style={styles.buttonText}>
+              {pressing ? 'Mantén pulsado...' : 'Aceptar'}
+            </Text>
+            {pressing && (
+              <View style={styles.progressBarContainer}>
+                <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
+              </View>
+            )}
           </Pressable>
         </View>
       </View>
@@ -64,12 +115,29 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 32,
     alignItems: 'center',
+    marginTop: 8,
+  },
+  buttonPressing: {
+    backgroundColor: COLORS.blue,
   },
   buttonText: {
     color: COLORS.white,
     fontWeight: 'bold',
     fontFamily: FONTS.text,
     fontSize: 16,
+  },
+  progressBarContainer: {
+    width: '100%',
+    height: 6,
+    backgroundColor: COLORS.gray + '40',
+    borderRadius: 4,
+    marginTop: 8,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: 6,
+    backgroundColor: COLORS.white,
+    borderRadius: 4,
   },
 });
 
