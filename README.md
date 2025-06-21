@@ -1,7 +1,6 @@
-🎮 #InnolandGame - Beta Abierta
+🎮 InnolandGame - Beta Abierta
 Un juego educativo interactivo desarrollado con React Native y Expo que combina aprendizaje con diversión a través de desafíos gamificados y experiencias multijugador. Beta Abierta - Disponible para testing y feedback de la comunidad.
 
-📋 #Descripción
 InnolandGame es una aplicación móvil innovadora que ofrece una experiencia de aprendizaje única mediante:
 
 Sistema de salas multijugador: Crea o únete a salas de juego para competir con otros jugadores.
@@ -16,7 +15,6 @@ Sistema de puntuación: Magnetos como moneda virtual para incentivar la particip
 
 Interfaz moderna y responsive: Diseño adaptativo que funciona en diferentes tamaños de pantalla.
 
-🚀 Características Principales
 🎯 Sistema de Juego
 ✨ RolePicker: Selección entre 10 roles especializados (Experto en IA, Agente Territorial, Inversor Visionario, etc.).
 
@@ -50,7 +48,6 @@ Interfaz moderna y responsive: Diseño adaptativo que funciona en diferentes tam
 
 🔔 Modales interactivos: Sistema de eventos y notificaciones en tiempo real.
 
-🛠️ Tecnologías Utilizadas
 Core Framework
 React Native 0.74.5 - Framework principal
 
@@ -80,7 +77,6 @@ Axios - Cliente HTTP para APIs
 
 JSqr - Procesamiento de códigos QR
 
-📦 Instalación
 Prerrequisitos
 Node.js (versión 16 o superior)
 
@@ -126,7 +122,6 @@ npm run ios
 # Para Web
 npm run web
 
-🏗️ Estructura del Proyecto
 InnolandGame/
 ├── src/
 │   ├── components/
@@ -167,7 +162,6 @@ InnolandGame/
 ├── app.json                      # Configuración de Expo
 └── README.md                     # Este archivo
 
-🎯 Cómo Usar la Aplicación
 1. Registro y Autenticación
 Crea una cuenta o inicia sesión con Firebase Auth.
 
@@ -218,7 +212,6 @@ Ganar magnetos: Acumula puntos por respuestas correctas y participación.
 
 🎉 Fiestas del Pilar 2.0 - Mejora de experiencias en eventos masivos.
 
-🔧 Scripts Disponibles
 npm start - Inicia el servidor de desarrollo de Expo.
 
 npm run android - Ejecuta la app en Android.
@@ -231,7 +224,6 @@ npm run build:web - Genera build para web.
 
 npm run build:android - Build para Android con EAS.
 
-📱 Configuración y Permisos
 Permisos Requeridos
 📷 Cámara: Para escanear códigos QR de desafíos.
 
@@ -251,7 +243,6 @@ FIREBASE_APP_ID=tu_app_id
 # OpenAI Configuration
 OPENAI_API_KEY=tu_openai_key
 
-🚧 Estado del Proyecto - Beta Abierta
 Versión actual: 1.0.0-beta
 
 Estado: Beta Abierta para Testing Comunitario
@@ -303,7 +294,6 @@ Estado: Beta Abierta para Testing Comunitario
 
 🎪 Modo evento para competiciones masivas.
 
-🧪 Participar en la Beta
 Como Tester
 Descarga la app desde los canales de distribución beta.
 
@@ -328,7 +318,6 @@ Push a tu rama (git push origin feature/NuevaFuncionalidad).
 
 Abre un Pull Request con descripción detallada.
 
-🐛 Reportar Issues
 Para reportar bugs o sugerir mejoras:
 
 Revisa si ya existe un issue similar.
@@ -365,7 +354,6 @@ Si aplica, añadir screenshots.
 - SO: [ej. iOS 15.1, Android 12]
 - Versión de la App: [ej. 1.0.0-beta]
 
-🤝 Contribución y Comunidad
 Directrices de Contribución
 Código limpio: Seguir principios SOLID y Clean Code.
 
@@ -382,30 +370,16 @@ Comunidad
 
 📧 Contacto directo: Para colaboraciones especiales.
 
-📄 Licencia
-Este proyecto está bajo la Licencia MIT. Ver el archivo LICENSE para más detalles.
 
-👨‍💻 Autor y Créditos
 André Saúl - Desarrollador Principal
 
-📧 Email: [contacto]
+📧 Email: andresaul16s@gmail.com
 
 🐙 GitHub: @AndreSaul16
 
-🔗 LinkedIn: [perfil]
+🔗 LinkedIn: https://www.linkedin.com/in/sbriceño/
 
-Agradecimientos Especiales
-🚀 Equipo de React Native y Expo - Por las herramientas increíbles.
 
-🔥 Firebase Team - Por el backend robusto y escalable.
-
-🤖 OpenAI - Por hacer posible la validación inteligente.
-
-🧪 Beta Testers - Por el feedback valioso y la paciencia.
-
-🏛️ Comunidad de Aragón - Por inspirar los desafíos locales.
-
-🎯 Call to Action
 Para Usuarios
 ⭐ ¡Dale una estrella al proyecto si te gusta! 📱 Descarga la beta y comparte tu experiencia 🗣️ Recomienda InnolandGame a tu comunidad
 
