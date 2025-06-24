@@ -1,180 +1,395 @@
-# 🎮 InnolandGame - Beta
+# 🎮 InnolandGame - Beta Abierta
 
-Un juego educativo interactivo desarrollado con React Native y Expo que combina aprendizaje con diversión a través de desafíos gamificados. **Versión Beta** - En desarrollo activo.
+Un juego educativo interactivo desarrollado con React Native y Expo que combina aprendizaje con diversión a través de desafíos gamificados y experiencias multijugador. Beta Abierta - Disponible para testing y feedback de la comunidad.
 
-## 📋 Descripción
+InnolandGame es una aplicación móvil innovadora que ofrece una experiencia de aprendizaje única mediante:
 
-InnolandGame es una aplicación móvil que ofrece una experiencia de aprendizaje única mediante:
-- **Selección de roles**: Los usuarios pueden elegir entre diferentes roles de aprendizaje
-- **Desafíos interactivos**: Sistema de retos que adaptan el contenido según el rol seleccionado
-- **Funcionalidades multimedia**: Integración de cámara, audio y animaciones
-- **Interfaz moderna**: Diseño intuitivo y atractivo con componentes UI personalizados
+Sistema de salas multijugador: Crea o únete a salas de juego para competir con otros jugadores.
 
-## 🚀 Características Principales
+Selección de roles especializados: 10 roles únicos con enfoques específicos de aprendizaje e innovación.
 
-- ✨ **RolePicker**: Componente para selección de roles de usuario
-- 📷 **CameraOpener**: Funcionalidad de cámara integrada para escanear códigos QR
-- 🎯 **ChallengeManager**: Pantalla de desafíos interactivos
-- 🎨 **Animaciones fluidas**: Efectos visuales con React Native Reanimated
-- 📱 **Multiplataforma**: Compatible con iOS, Android y Web
-- 🎤 **Síntesis de voz**: Funcionalidad de texto a voz con Expo Speech
-- 🔒 **Permisos seguros**: Manejo de permisos de cámara y audio
+Desafíos interactivos con IA: Sistema de validación inteligente que adapta las respuestas según el rol del jugador.
 
-## 🛠️ Tecnologías Utilizadas
+Escáner QR integrado: Funcionalidad de cámara para escanear códigos QR y activar desafíos.
 
-- **React Native** - Framework principal
-- **Expo** - Plataforma de desarrollo y build
-- **React Native Reanimated** - Animaciones avanzadas
-- **Expo Camera** - Funcionalidad de cámara
-- **Expo Speech** - Síntesis de voz
-- **TypeScript** - Tipado estático
-- **React Native Gesture Handler** - Gestos nativos
-- **React Native SVG** - Gráficos vectoriales
-- **Axios** - Cliente HTTP
+Sistema de puntuación: Magnetos como moneda virtual para incentivar la participación.
 
-## 📦 Instalación
+Interfaz moderna y responsive: Diseño adaptativo que funciona en diferentes tamaños de pantalla.
 
-### Prerrequisitos
+# 🎯 Sistema de Juego
+✨ RolePicker: Selección entre 10 roles especializados (Experto en IA, Agente Territorial, Inversor Visionario, etc.).
 
-- Node.js (versión 16 o superior)
-- npm o yarn
-- Expo CLI (`npm install -g @expo/cli`)
-- Android Studio (para desarrollo Android)
-- Xcode (para desarrollo iOS, solo macOS)
+🏠 HomeScreen: Dashboard personalizado con estadísticas y acceso rápido a funciones.
 
-### Pasos de Instalación
+🎮 GameScreen: Experiencia de juego completa con eventos en tiempo real.
 
-1. **Clonar el repositorio**
-   ```bash
-   git clone https://github.com/AndreSaul16/InnolandGame.git
-   cd InnolandGame
-   ```
+🏆 ScoreBoard: Sistema de puntuación y ranking de jugadores.
 
-2. **Instalar dependencias**
-   ```bash
-   npm install
-   # o
-   yarn install
-   ```
+📊 ResultsScreen: Análisis detallado de resultados post-partida.
 
-3. **Iniciar el proyecto**
-   ```bash
-   npm start
-   # o
-   yarn start
-   ```
+# 📱 Funcionalidades Técnicas
+📷 CameraOpener: Escáner QR integrado con detección automática.
 
-4. **Ejecutar en dispositivo/simulador**
-   ```bash
-   # Para Android
-   npm run android
-   
-   # Para iOS
-   npm run ios
-   
-   # Para Web
-   npm run web
-   ```
+🎯 ChallengeUI: Interfaz de desafíos con validación por IA.
 
-## 🏗️ Estructura del Proyecto
+🔄 Sistema de salas: Creación y gestión de salas multijugador en tiempo real.
 
-```
+🎤 Síntesis de voz: Funcionalidad de texto a voz con Expo Speech.
+
+🔒 Autenticación Firebase: Sistema seguro de usuarios y perfiles.
+
+🌐 Multiplataforma: Compatible con iOS, Android y Web.
+
+🎨 Experiencia de Usuario
+🎨 Animaciones fluidas: Efectos visuales con React Native Reanimated.
+
+📱 Diseño responsive: Adaptación automática a diferentes dispositivos.
+
+🎭 AvatarPicker: Personalización de perfiles de usuario.
+
+🔔 Modales interactivos: Sistema de eventos y notificaciones en tiempo real.
+
+Core Framework
+React Native 0.74.5 - Framework principal
+
+Expo SDK 51 - Plataforma de desarrollo y build
+
+TypeScript - Tipado estático para mayor robustez
+
+Funcionalidades Avanzadas
+Firebase 11.9.1 - Backend como servicio (autenticación, base de datos en tiempo real)
+
+React Native Reanimated 3.10 - Animaciones de alto rendimiento
+
+Expo Camera 15.0 - Funcionalidad de cámara y escáner QR
+
+Expo Speech 12.0 - Síntesis de voz
+
+React Navigation 7.1 - Navegación entre pantallas
+
+UI/UX y Utilidades
+React Native Gesture Handler - Gestos nativos
+
+React Native SVG - Gráficos vectoriales
+
+React Native Heroicons - Iconografía moderna
+
+Axios - Cliente HTTP para APIs
+
+JSqr - Procesamiento de códigos QR
+
+Prerrequisitos
+Node.js (versión 16 o superior)
+
+npm o yarn
+
+Expo CLI (npm install -g @expo/cli)
+
+Android Studio (para desarrollo Android)
+
+Xcode (para desarrollo iOS, solo macOS)
+
+Pasos de Instalación
+Clonar el repositorio
+
+git clone https://github.com/AndreSaul16/InnolandGame.git
+cd InnolandGame
+
+Instalar dependencias
+
+npm install
+# o
+yarn install
+
+Configurar variables de entorno
+
+# Crear archivo .env en la raíz del proyecto
+# Añadir configuraciones de Firebase y OpenAI
+
+Iniciar el proyecto
+
+npm start
+# o
+yarn start
+
+Ejecutar en dispositivo/simulador
+
+# Para Android
+npm run android
+
+# Para iOS
+npm run ios
+
+# Para Web
+npm run web
+
 InnolandGame/
 ├── src/
 │   ├── components/
-│   │   ├── UI/                    # Componentes de interfaz
-│   │   │   ├── RolePicker.jsx     # Selector de roles
-│   │   │   ├── ChallengeManager.jsx # Pantalla de desafíos
-│   │   │   └── CameraOpener.jsx   # Componente de cámara
-│   │   ├── challenges/            # Componentes de desafíos
-│   │   └── utils/                 # Utilidades y helpers
-│   ├── services/                  # Servicios y APIs
-│   ├── data/                      # Datos estáticos
-│   └── styles/                    # Estilos globales
-├── assets/                        # Recursos multimedia
-├── android/                       # Configuración específica de Android
-├── App.js                         # Componente principal
-├── package.json                   # Dependencias del proyecto
-├── app.json                       # Configuración de Expo
-└── README.md                      # Este archivo
-```
+│   │   ├── UI/                   # Componentes de interfaz
+│   │   │   ├── GameUI/           # Componentes del juego
+│   │   │   │   ├── GameScreen.jsx    # Pantalla principal del juego
+│   │   │   │   ├── ScoreBoard.jsx    # Tabla de puntuaciones
+│   │   │   │   ├── ResultsScreen.jsx # Pantalla de resultados
+│   │   │   │   └── ...             # Otros componentes de juego
+│   │   │   ├── HomeUI/           # Componentes del home
+│   │   │   │   ├── HomeScreen.jsx    # Pantalla principal
+│   │   │   │   ├── ProfileHeader.jsx # Cabecera de perfil
+│   │   │   │   └── ...             # Otros componentes del home
+│   │   │   ├── LoginUI/          # Sistema de autenticación
+│   │   │   ├── RoomUI/           # Gestión de salas
+│   │   │   ├── UserUI/           # Perfil de usuario
+│   │   │   ├── RolePicker/       # Selector de roles
+│   │   │   ├── CameraOpener.jsx    # Escáner QR
+│   │   │   ├── ChallengeUI.jsx     # Interfaz de desafíos
+│   │   │   └── UIController.jsx    # Controlador principal
+│   │   ├── challenges/           # Lógica de desafíos
+│   │   └── utils/                # Utilidades y helpers
+│   ├── services/                 # Servicios y APIs
+│   │   ├── FirebaseDataService.js  # Servicio de Firebase
+│   │   └── OpenAIService.jsx       # Integración con IA
+│   ├── context/                  # Contextos de React
+│   ├── data/                     # Datos estáticos y configuración
+│   │   └── challenges.json       # Base de datos de desafíos
+│   ├── styles/                   # Estilos globales
+│   └── theme.js                  # Configuración de tema
+├── assets/                       # Recursos multimedia
+│   ├── fonts/                    # Fuentes personalizadas
+│   ├── logo/                     # Logotipos
+│   └── roles/                    # Imágenes de roles
+├── functions/                    # Firebase Cloud Functions
+├── App.js                        # Componente principal
+├── package.json                  # Dependencias del proyecto
+├── app.json                      # Configuración de Expo
+└── README.md                     # Este archivo
 
-## 🎯 Uso
+1. Registro y Autenticación
+Crea una cuenta o inicia sesión con Firebase Auth.
 
-1. **Selección de Rol**: Al iniciar la aplicación, el usuario debe seleccionar un rol de aprendizaje
-2. **Confirmación**: El sistema confirma la selección del rol
-3. **Desafíos**: Se presentan desafíos específicos según el rol elegido
-4. **Interacción**: El usuario puede usar la cámara para escanear códigos QR, audio y otras funcionalidades
+Personaliza tu perfil con avatar y información básica.
 
-## 🔧 Scripts Disponibles
+2. Selección de Rol
+Elige entre 10 roles especializados:
 
-- `npm start` - Inicia el servidor de desarrollo de Expo
-- `npm run android` - Ejecuta la app en Android
-- `npm run ios` - Ejecuta la app en iOS
-- `npm run web` - Ejecuta la app en el navegador web
+🤖 Experto en IA - Enfoque en inteligencia artificial y machine learning.
 
-## 📱 Configuración de Permisos
+🌍 Agente Territorial - Conocimiento del ecosistema local aragonés.
 
-La aplicación requiere los siguientes permisos:
-- **Cámara**: Para escanear códigos QR de INNOLAND
-- **Audio**: Para funcionalidades de síntesis de voz
+💰 Inversor Visionario - Perspectiva de modelos de negocio y escalabilidad.
 
-## 🚧 Estado del Proyecto - Beta
+🔗 Conector del Ecosistema - Facilitación de colaboraciones.
 
-**Versión actual**: 1.0.0-beta
+🎨 Diseñador Flash - Creatividad y diseño de experiencias.
 
-### ✅ Funcionalidades Implementadas
-- Selección de roles de usuario
-- Sistema de desafíos básico
-- Integración de cámara para códigos QR
-- Síntesis de voz
-- Interfaz de usuario moderna
-- Configuración multiplataforma
+🔍 Explorador de Tendencias - Identificación de oportunidades emergentes.
 
-### 🔄 En Desarrollo
-- Mejoras en la experiencia de usuario
-- Optimización de rendimiento
-- Nuevos tipos de desafíos
-- Sistema de progreso del usuario
+🚀 Facilitador de Innovación - Metodologías de innovación.
 
-### 📋 Próximas Funcionalidades
-- Sistema de puntuación
-- Modo multijugador
-- Personalización avanzada
-- Integración con backend
+🛡️ Hacker Ético - Seguridad y soluciones tecnológicas responsables.
 
-## 🤝 Contribución
+💡 Ciudadano Innovador - Perspectiva centrada en el usuario.
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+⭐ Joven Talento - Enfoque fresco y disruptivo.
 
-## 🐛 Reportar Bugs
+3. Experiencia de Juego
+Crear sala: Inicia una nueva partida y comparte el código.
 
-Si encuentras algún bug o tienes sugerencias, por favor:
-1. Revisa si ya existe un issue relacionado
-2. Crea un nuevo issue con una descripción detallada
-3. Incluye pasos para reproducir el problema
-4. Especifica tu dispositivo y versión del sistema operativo
+Unirse a sala: Ingresa un código para participar en partidas existentes.
 
-## 📝 Licencia
+Escanear QR: Usa la cámara para activar desafíos específicos.
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+Responder desafíos: La IA evalúa tus respuestas según tu rol.
 
-## 👨‍💻 Autor
+Ganar magnetos: Acumula puntos por respuestas correctas y participación.
 
-**André Saúl** - [GitHub](https://github.com/AndreSaul16)
+4. Desafíos Disponibles
+🍷 Conectando Viñedos - Integración tecnológica en la industria vinícola.
 
-## 🙏 Agradecimientos
+🏭 Gigantes de Teruel - Conocimiento del ecosistema empresarial local.
 
-- Equipo de desarrollo de React Native
-- Comunidad de Expo
-- Contribuidores y testers de la versión beta
+🎒 Mochila Digital Rural - Herramientas para emprendimiento rural.
 
----
+🌾 AgroTech Aragonés - Innovación en agricultura.
 
-⭐ Si te gusta este proyecto, ¡dale una estrella en GitHub!
+🎉 Fiestas del Pilar 2.0 - Mejora de experiencias en eventos masivos.
 
-**Nota**: Esta es una versión beta. Algunas funcionalidades pueden estar en desarrollo o sujetas a cambios. 
+npm start - Inicia el servidor de desarrollo de Expo.
+
+npm run android - Ejecuta la app en Android.
+
+npm run ios - Ejecuta la app en iOS.
+
+npm run web - Ejecuta la app en el navegador web.
+
+npm run build:web - Genera build para web.
+
+npm run build:android - Build para Android con EAS.
+
+Permisos Requeridos
+📷 Cámara: Para escanear códigos QR de desafíos.
+
+🎤 Audio: Para funcionalidades de síntesis de voz.
+
+🌐 Internet: Para sincronización en tiempo real con Firebase.
+
+Variables de Entorno (.env)
+# Firebase Configuration
+FIREBASE_API_KEY=tu_api_key
+FIREBASE_AUTH_DOMAIN=tu_dominio
+FIREBASE_PROJECT_ID=tu_project_id
+FIREBASE_STORAGE_BUCKET=tu_bucket
+FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
+FIREBASE_APP_ID=tu_app_id
+
+# OpenAI Configuration
+OPENAI_API_KEY=tu_openai_key
+
+Versión actual: 1.0.0-beta
+
+Estado: Beta Abierta para Testing Comunitario
+
+✅ Funcionalidades Completamente Implementadas
+✨ Sistema completo de autenticación y perfiles de usuario.
+
+🎮 Experiencia de juego multijugador en tiempo real.
+
+🎯 10 roles especializados con lógica diferenciada.
+
+📷 Escáner QR integrado con detección automática.
+
+🤖 Validación de respuestas con IA (OpenAI GPT).
+
+🏆 Sistema de puntuación con magnetos.
+
+📊 Dashboard de estadísticas y resultados.
+
+🔄 Gestión de salas multijugador.
+
+🎨 Interfaz responsive y animaciones fluidas.
+
+🌐 Soporte completo para iOS, Android y Web.
+
+🔄 En Desarrollo Activo
+🎵 Mejoras en efectos de audio y feedback sonoro.
+
+📈 Analytics avanzados de rendimiento de jugadores.
+
+🌍 Localización en múltiples idiomas.
+
+🔧 Optimizaciones de rendimiento en dispositivos de gama baja.
+
+🎨 Nuevos temas visuales y personalización.
+
+📋 Roadmap Próximas Funcionalidades
+🏅 Sistema de logros y badges.
+
+📱 Modo offline para jugar sin conexión.
+
+🎯 Desafíos generados dinámicamente por IA.
+
+👥 Sistema de equipos y torneos.
+
+📊 Dashboard para educadores y facilitadores.
+
+🔗 Integración con plataformas educativas (Moodle, Canvas).
+
+🎪 Modo evento para competiciones masivas.
+
+Como Tester
+Descarga la app desde los canales de distribución beta.
+
+Explora todas las funcionalidades disponibles.
+
+Reporta bugs usando el sistema de issues de GitHub.
+
+Comparte feedback sobre la experiencia de usuario.
+
+Sugiere mejoras para futuras versiones.
+
+Como Desarrollador
+Fork el repositorio.
+
+Crea una rama para tu feature (git checkout -b feature/NuevaFuncionalidad).
+
+Implementa siguiendo los principios SOLID y Clean Code.
+
+Commit tus cambios (git commit -m 'Añadir nueva funcionalidad').
+
+Push a tu rama (git push origin feature/NuevaFuncionalidad).
+
+Abre un Pull Request con descripción detallada.
+
+Para reportar bugs o sugerir mejoras:
+
+Revisa si ya existe un issue similar.
+
+Crea un nuevo issue con:
+
+Descripción clara del problema.
+
+Pasos para reproducir.
+
+Dispositivo y versión del SO.
+
+Screenshots o videos si es relevante.
+
+Logs de error si están disponibles.
+
+Template de Bug Report
+**Descripción del Bug**
+Descripción clara y concisa del problema.
+
+**Pasos para Reproducir**
+1. Ir a '...'
+2. Hacer clic en '....'
+3. Observar error
+
+**Comportamiento Esperado**
+Descripción de lo que debería ocurrir.
+
+**Screenshots**
+Si aplica, añadir screenshots.
+
+**Información del Dispositivo:**
+- Dispositivo: [ej. iPhone 12, Samsung Galaxy S21]
+- SO: [ej. iOS 15.1, Android 12]
+- Versión de la App: [ej. 1.0.0-beta]
+
+Directrices de Contribución
+Código limpio: Seguir principios SOLID y Clean Code.
+
+Documentación: Comentar funciones complejas.
+
+Testing: Incluir tests para nuevas funcionalidades.
+
+Consistencia: Mantener el estilo de código existente.
+
+Comunidad
+💬 Discusiones: Usa GitHub Discussions para ideas y preguntas.
+
+🐛 Issues: Para bugs y feature requests.
+
+📧 Contacto directo: Para colaboraciones especiales.
+
+
+André Saúl - Desarrollador Principal
+
+📧 Email: andresaul16s@gmail.com
+
+🐙 GitHub: @AndreSaul16
+
+🔗 LinkedIn: https://www.linkedin.com/in/sbriceño/
+
+
+Para Usuarios
+⭐ ¡Dale una estrella al proyecto si te gusta! 📱 Descarga la beta y comparte tu experiencia 🗣️ Recomienda InnolandGame a tu comunidad
+
+Para Desarrolladores
+🔧 Contribuye al código y mejora la plataforma 📖 Mejora la documentación 🧪 Ayuda con testing y QA
+
+Para Educadores
+🎓 Prueba InnolandGame en tus clases 📊 Comparte resultados y casos de uso 💡 Sugiere nuevos desafíos educativos
+
+🚀 InnolandGame - Donde la innovación se encuentra con la diversión
+
+Versión Beta Abierta - Tu feedback es fundamental para crear la mejor experiencia de aprendizaje gamificado.
