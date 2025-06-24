@@ -15,16 +15,20 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 // RoomLobby.jsx
 // Componente de sala de espera: muestra el código de la sala, los jugadores conectados y permite al host iniciar la partida.
 
-const RoomLobby = ({ roomCode, user, isHost, players = [] }) => {
+const RoomLobby = ({ roomCode, user, isHost, players = [], gameMode = 'classic' }) => {
   const navigation = useNavigation();
   const [roomStatus, setRoomStatus] = useState('waiting');
   const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [showRoleModal, setShowRoleModal] = useState(!user?.role);
+  const [showRoleModal, setShowRoleModal] = useState(gameMode !== 'battle' && !user?.role);
 
   // Handler para empezar la partida
   const handleStartGame = async () => {
     await updateRoomStatus(roomCode, 'in_progress');
-    navigation.navigate('GameScreen', { roomCode, user: { ...user, isHost: true } });
+    if (gameMode === 'battle') {
+      navigation.navigate('BattleScreen', { roomCode, user: { ...user, isHost: true } });
+    } else {
+      navigation.navigate('GameScreen', { roomCode, user: { ...user, isHost: true } });
+    }
   };
 
   // Handler para salir de la sala
@@ -92,6 +96,10 @@ const RoomLobby = ({ roomCode, user, isHost, players = [] }) => {
 
   // Log para saber si el usuario tiene rol
   useEffect(() => {
+    if (gameMode === 'battle') {
+      setShowRoleModal(false);
+      return;
+    }
     console.log('[RoomLobby] user:', user);
     if (!user?.role) {
       console.log('[RoomLobby] El usuario NO tiene rol. Mostrando modal de selección de rol.');
@@ -100,7 +108,7 @@ const RoomLobby = ({ roomCode, user, isHost, players = [] }) => {
       console.log('[RoomLobby] El usuario YA tiene rol:', user.role);
       setShowRoleModal(false);
     }
-  }, [user?.role]);
+  }, [user?.role, gameMode]);
 
   // Handler cuando el usuario confirma un rol
   const handleRoleConfirmed = (roleName) => {
@@ -116,21 +124,23 @@ const RoomLobby = ({ roomCode, user, isHost, players = [] }) => {
   // --- Renderizado ---
   return (
     <View style={styles.container}>
-      {/* Modal automático de selección de rol */}
-      <Modal
-        visible={showRoleModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => {}}
-      >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-          <RoleList
-            roomCode={roomCode}
-            user={user}
-            onRoleConfirmed={handleRoleConfirmed}
-          />
-        </View>
-      </Modal>
+      {/* Modal automático de selección de rol (solo si no es battle) */}
+      {gameMode !== 'battle' && (
+        <Modal
+          visible={showRoleModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => {}}
+        >
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
+            <RoleList
+              roomCode={roomCode}
+              user={user}
+              onRoleConfirmed={handleRoleConfirmed}
+            />
+          </View>
+        </Modal>
+      )}
       {/* Botón de salir sala */}
       <TouchableOpacity
         onPress={() => setShowLeaveModal(true)}

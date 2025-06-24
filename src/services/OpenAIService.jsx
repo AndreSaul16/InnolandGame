@@ -108,6 +108,38 @@ class OpenAIService {
       throw new Error("No se pudo transcribir el audio.");
     }
   }
+
+  /**
+   * Genera un reto de tipo "Battle" (pregunta de opción múltiple).
+   * Espera un objeto con la forma:
+   * {
+   *   question: string,
+   *   options: string[4],
+   *   correctAnswer: number | string,
+   *   explanation?: string
+   * }
+   * @param {Object} params - Parámetros opcionales de generación.
+   * @param {string} params.difficulty - Nivel de dificultad (por defecto 'easy').
+   * @param {string[]} params.categories - Categorías deseadas.
+   * @returns {Promise<Object>} - Reto generado por la IA.
+   */
+  async generateBattleChallenge(params = {}) {
+    try {
+      const functions = getFunctions(app);
+      const generateBattleChallengeFn = httpsCallable(functions, "generateBattleChallenge");
+      const result = await generateBattleChallengeFn(params);
+      return result.data;
+    } catch (error) {
+      console.warn("[OpenAIService] No se pudo generar reto Battle desde la nube. Usando fallback local.", error.message);
+      // Fallback estático para desarrollo local sin backend
+      return {
+        question: "¿Cuál es la capital de Francia?",
+        options: ["Madrid", "París", "Berlín", "Roma"],
+        correctAnswer: 1,
+        explanation: "París es la capital y ciudad más poblada de Francia.",
+      };
+    }
+  }
 }
 
 // Exportamos una única instancia del servicio (patrón Singleton).

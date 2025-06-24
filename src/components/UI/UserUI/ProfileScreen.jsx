@@ -39,6 +39,7 @@ import {
 } from '../../../services/FirebaseDataService';
 import { showAlert } from '../../../utils/showAlert';
 import AvatarPicker, { AVATAR_IMAGES } from './AvatarPicker';
+import { useNavigation } from '@react-navigation/native';
 
 const ProfileScreen = ({ user, onGoBack }) => {
   // Estados para los datos del usuario
@@ -68,6 +69,8 @@ const ProfileScreen = ({ user, onGoBack }) => {
   const slideAnim = React.useRef(new Animated.Value(50)).current;
 
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     // Animación de entrada
@@ -463,13 +466,23 @@ const ProfileScreen = ({ user, onGoBack }) => {
 
           {/* Estadísticas */}
           <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
+            <TouchableOpacity
+              style={styles.statItem}
+              onPress={() => {
+                if (typeof onGoBack === 'function') {
+                  onGoBack(); // Cierra el modal en HomeScreen
+                }
+                // Usamos un pequeño retraso para asegurarnos de que el modal se oculte antes de navegar
+                setTimeout(() => navigation.navigate('ShopScreen'), 10);
+              }}
+              activeOpacity={0.8}
+            >
               <View style={styles.statIcon}>
                 <StarIcon size={24} color={COLORS.primary} />
               </View>
               <Text style={styles.statValue}>{userData.magnetos_totales || 0}</Text>
               <Text style={styles.statLabel}>Magnetos</Text>
-            </View>
+            </TouchableOpacity>
             
             <View style={styles.statItem}>
               <View style={styles.statIcon}>
