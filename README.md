@@ -31,6 +31,7 @@ InnolandGame es una app educativa gamificada desarrollada con React Native y Exp
 - Soporte iOS, Android y Web
 
 ## 📁 Estructura del Proyecto
+```
 InnolandGame/
 ├── src/
 │   ├── assets/                # Imágenes, fuentes, etc.
@@ -49,6 +50,7 @@ InnolandGame/
 ├── package.json              # Dependencias
 ├── app.json                  # Configuración de Expo
 └── README.md                 # Este archivo
+```
 
 ## 🔑 Variables de Entorno
 
