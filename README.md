@@ -1,4 +1,3 @@
-que te parece este readme? 
 # 🎮 InnolandGame - Beta Abierta
 
 InnolandGame es una app educativa gamificada desarrollada con React Native y Expo, que combina aprendizaje, retos y multijugador en tiempo real. Permite a los usuarios elegir roles, participar en desafíos validados por IA y competir por puntos (magnetos) en un entorno seguro y multiplataforma.
