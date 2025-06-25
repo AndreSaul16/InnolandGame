@@ -138,7 +138,8 @@ Estructura principal de la Realtime Database:
 
 ## 🏗️ Arquitectura
 
-![alt text](image.png)
+![Navegation Layer (3920 x 2080 px) (3920 x 4080 px) (5124 x 4080 px) (5124 x 4580 px)](https://github.com/user-attachments/assets/35c48cc1-f130-4514-b73f-33839a2bf55b)
+
 
 
 ## ⚠️ Mejoras y Consideraciones Pendientes
