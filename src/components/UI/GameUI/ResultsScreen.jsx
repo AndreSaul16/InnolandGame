@@ -32,7 +32,7 @@ const ResultsScreen = (props) => {
   console.log('[ResultsScreen] Render principal');
   const route = useRoute();
   const navigation = useNavigation();
-  const { roomCode, user, players: passedPlayers } = route.params || props;
+  const { roomCode, user, players: passedPlayers, mode } = route.params || props;
   const [gameState, setGameState] = useState(null);
   const [lastGameSaved, setLastGameSaved] = useState(false);
   const [totalMagnetos, setTotalMagnetos] = useState({});
@@ -47,7 +47,9 @@ const ResultsScreen = (props) => {
   const slideAnim = useRef(new Animated.Value(50)).current;
   const trophyRotateAnim = useRef(new Animated.Value(0)).current;
 
+  // Solo escuchar gameState si no es modo battle
   useEffect(() => {
+    if (mode === 'battle') return;
     console.log('[ResultsScreen] useEffect montado, roomCode:', roomCode);
     if (!roomCode) return;
     const unsubscribe = listenGameState(roomCode, (state) => {
@@ -70,7 +72,7 @@ const ResultsScreen = (props) => {
       }
     });
     return () => unsubscribe();
-  }, [roomCode, navigation, user, wasGameState]);
+  }, [roomCode, navigation, user, wasGameState, mode]);
 
   // Animación de entrada
   useEffect(() => {
@@ -161,6 +163,52 @@ const ResultsScreen = (props) => {
     getUsersTotalMagnetos(uids).then(setTotalMagnetos);
   }, [gameState]);
 
+  // Si es modo battle y recibimos players por props, mostrar resultado directamente
+  if (mode === 'battle' && passedPlayers) {
+    const sortedPlayers = [...passedPlayers].sort((a, b) => (b.score || 0) - (a.score || 0));
+    const winner = sortedPlayers[0];
+    const winnerScore = winner?.score || 0;
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+        <View style={styles.outerWebContainer}>
+          <View style={styles.scrollWebContent}>
+            {/* Header celebratorio */}
+            <View style={styles.celebrationHeader}>
+              <TrophyIcon size={80} color={COLORS.primary} />
+              <Text style={styles.celebrationTitle}>¡Partida Finalizada!</Text>
+            </View>
+            
+            {/* Resultado del jugador */}
+            <View style={styles.winnerCard}>
+              <Text style={styles.winnerName}>{winner?.name || winner?.nombre}</Text>
+              <View style={styles.winnerScoreContainer}>
+                <FireIcon size={24} color={COLORS.primary} />
+                <Text style={styles.winnerScore}>{winnerScore} puntos</Text>
+              </View>
+            </View>
+
+          </View>
+          {/* Botón de regreso */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.homeButton}
+              onPress={() => {
+                setRoomCode(null);
+                setUserRole(null);
+                navigation.replace('Home', { user });
+              }}
+              activeOpacity={0.8}
+            >
+              <HomeIcon size={24} color={COLORS.white} />
+              <Text style={styles.homeButtonText}>Volver al Menú</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   if (!gameState) {
     return (
       <Animated.View style={[styles.loadingContainer, { opacity: fadeAnim }]}>
@@ -221,15 +269,11 @@ const ResultsScreen = (props) => {
               <StarIcon size={20} color={COLORS.blue} />
             </View>
           </Animated.View>
-          {/* Ganador destacado */}
+          {/* Resultado del jugador */}
           <Animated.View style={[
             styles.winnerCard,
             { transform: [{ scale: scaleAnim }] }
           ]}>
-            <View style={styles.winnerHeader}>
-              <TrophyIcon size={32} color={COLORS.primary} />
-              <Text style={styles.winnerLabel}>GANADOR</Text>
-            </View>
             <Text style={styles.winnerName}>{winner.nombre}</Text>
             <View style={styles.winnerScoreContainer}>
               <FireIcon size={24} color={COLORS.primary} />
@@ -340,21 +384,6 @@ const styles = StyleSheet.create({
         elevation: 8,
       },
     }),
-  },
-
-  winnerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-  },
-
-  winnerLabel: {
-    fontFamily: FONTS.title,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-    letterSpacing: 2,
   },
 
   winnerName: {

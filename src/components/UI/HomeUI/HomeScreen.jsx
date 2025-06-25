@@ -18,6 +18,7 @@ import {
   PlusIcon,
   UserGroupIcon,
   XMarkIcon,
+  BoltIcon,
 } from "react-native-heroicons/solid";
 import ProfileHeader from "./ProfileHeader";
 import MagnetCount from "./MagnetCount";
@@ -130,13 +131,13 @@ const HomeScreen = ({ route, user: userProp, navigation: navigationProp }) => {
         Animated.timing(joinModalAnim, {
           toValue: 1,
           duration: 300,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.spring(joinModalScale, {
           toValue: 1,
           tension: 80,
           friction: 8,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
       ]).start();
     } else {
@@ -144,12 +145,12 @@ const HomeScreen = ({ route, user: userProp, navigation: navigationProp }) => {
         Animated.timing(joinModalAnim, {
           toValue: 0,
           duration: 200,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.timing(joinModalScale, {
           toValue: 0.9,
           duration: 200,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
       ]).start();
     }
@@ -162,7 +163,7 @@ const HomeScreen = ({ route, user: userProp, navigation: navigationProp }) => {
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 400,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
         easing: Easing.out(Easing.cubic),
       }).start(() => {
         setAnimating(false);
@@ -339,6 +340,16 @@ const HomeScreen = ({ route, user: userProp, navigation: navigationProp }) => {
             >
               <PlusIcon size={24} color={COLORS.white} />
               <Text style={styles.primaryButtonText}>Crear Sala</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.secondaryButton, animating && { opacity: 0.7 }]}
+              onPress={() => navigation.navigate('BattleScreen')}
+              activeOpacity={0.8}
+              disabled={animating}
+            >
+              <BoltIcon size={24} color={COLORS.primary} />
+              <Text style={styles.secondaryButtonText}>Modo Battle</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -527,11 +538,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    ...Platform.select({
+      web: {
+        boxShadow: `0 4px 8px ${COLORS.primary}4D`,
+      },
+      default: {
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+      },
+    }),
   },
 
   primaryButtonText: {
@@ -552,11 +570,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 2,
     borderColor: COLORS.primary,
-    shadowColor: COLORS.darkBlue,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...Platform.select({
+      web: {
+        boxShadow: `0 2px 4px ${COLORS.darkBlue}1A`,
+      },
+      default: {
+        shadowColor: COLORS.darkBlue,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      },
+    }),
   },
 
   secondaryButtonText: {
@@ -584,11 +609,18 @@ const styles = StyleSheet.create({
     padding: 28,
     width: "90%",
     maxWidth: 360,
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 12,
+    ...Platform.select({
+      web: {
+        boxShadow: `0 8px 16px ${COLORS.black}40`,
+      },
+      default: {
+        shadowColor: COLORS.black,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.25,
+        shadowRadius: 16,
+        elevation: 12,
+      },
+    }),
   },
 
   joinModalHeader: {

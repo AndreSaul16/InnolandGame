@@ -11,7 +11,7 @@ import LoadingScreen from '../../../utils/LoadingScreen';
 // Componente que escucha los datos de la sala y muestra el lobby con la lista de jugadores y el acceso a la sala de espera.
 
 const RoomScreen = ({ route }) => {
-  const { roomCode, user, isHost } = route.params;
+  const { roomCode, user, isHost, gameMode = 'classic' } = route.params;
   const [roomData, setRoomData] = useState(null);
   const navigation = useNavigation();
   const [timeoutError, setTimeoutError] = useState(false);
@@ -97,6 +97,7 @@ const RoomScreen = ({ route }) => {
       user={user}
       isHost={isUserHost}
       players={players}
+      gameMode={gameMode}
     />
   );
 };

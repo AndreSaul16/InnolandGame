@@ -10,6 +10,7 @@ import {
   Dimensions,
   Alert,
   StatusBar,
+  Platform,
 } from "react-native";
 import { PLAYER_ROLES_DATA } from "../../../data/gameState";
 import {
@@ -258,23 +259,38 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 16,
     marginBottom: 16,
-    shadowColor: COLORS.darkBlue,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
     borderWidth: 1,
     borderColor: COLORS.gray + '30',
+    ...Platform.select({
+      web: {
+        boxShadow: `0 2px 8px ${COLORS.darkBlue}1A`,
+      },
+      default: {
+        shadowColor: COLORS.darkBlue,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+      },
+    }),
   },
 
   roleCardSelected: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.darkBlue,
     borderWidth: 2,
-    shadowColor: COLORS.primary,
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
+    ...Platform.select({
+      web: {
+        boxShadow: `0 4px 12px ${COLORS.primary}33`,
+      },
+      default: {
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 12,
+        elevation: 8,
+      },
+    }),
   },
 
   roleCardDisabled: {

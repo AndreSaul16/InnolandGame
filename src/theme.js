@@ -12,6 +12,13 @@ export const COLORS = {
 };
 
 export const FONTS = {
-  title: 'DarkerGrotesque', // Usarás este nombre en fontFamily
-  text: 'Poppins',
+  title: 'Poppins', // Cambiado a Poppins como fuente principal
+  text: 'Poppins',  // Mantiene Poppins para texto
+  // Variantes de Poppins para diferentes pesos
+  light: 'Poppins-Light',
+  medium: 'Poppins-Medium',
+  semiBold: 'Poppins-SemiBold',
+  bold: 'Poppins-Bold',
+  extraBold: 'Poppins-ExtraBold',
+  black: 'Poppins-Black',
 }; 

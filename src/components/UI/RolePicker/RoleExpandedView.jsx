@@ -8,6 +8,7 @@ import {
   Animated,
   StatusBar,
   ScrollView,
+  Platform,
 } from "react-native";
 import { XMarkIcon, CheckIcon, UserCircleIcon } from "react-native-heroicons/solid";
 import { COLORS, FONTS } from '../../../theme';
@@ -29,13 +30,13 @@ export default function RoleExpandedView({
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
       Animated.spring(slideAnim, {
         toValue: 0,
         tension: 80,
         friction: 8,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       })
     ]).start();
   }, []);
@@ -48,12 +49,12 @@ export default function RoleExpandedView({
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 200,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
       Animated.timing(slideAnim, {
         toValue: 50,
         duration: 200,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       })
     ]).start(() => onClose());
   };
@@ -164,11 +165,18 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     maxHeight: screenHeight * 0.9,
     minHeight: screenHeight * 0.5,
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 16,
+    ...Platform.select({
+      web: {
+        boxShadow: `0 -4px 16px ${COLORS.black}33`,
+      },
+      default: {
+        shadowColor: COLORS.black,
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 16,
+        elevation: 16,
+      },
+    }),
   },
 
   header: {
@@ -257,11 +265,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    ...Platform.select({
+      web: {
+        boxShadow: `0 4px 8px ${COLORS.primary}4D`,
+      },
+      default: {
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+      },
+    }),
   },
 
   confirmButtonDisabled: {

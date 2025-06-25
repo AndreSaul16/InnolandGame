@@ -21,6 +21,8 @@ admin.initializeApp();
 // --- Definición de Secretos ---
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
 const openaiAssistantId = defineSecret("OPENAI_ASSISTANT_ID");
+const openaiBattleAssistantId = defineSecret("OPENAI_BATTLE_ASSISTANT_ID");
+const battleAssistantId = "asst_SNNjtlsvqmQ2pxEFE1vRKxGf"; // Asistente para generar retos Battle
 
 // ========================================================================
 //                   FUNCIÓN 1: evaluateChallenge
@@ -422,6 +424,119 @@ exports.transcribeAudio = onCall(
         fs.unlinkSync(tempFilePath);
       }
       throw new HttpsError("internal", "Error al transcribir el audio.");
+    }
+    
+  }
+);
+
+// ========================================================================
+//                   FUNCIÓN 3: generateBattleChallenge
+// ========================================================================
+exports.generateBattleChallenge = onCall(
+  { secrets: [openaiApiKey, openaiBattleAssistantId], timeoutSeconds: 120 },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError(
+        "unauthenticated",
+        "La función solo puede ser llamada por un usuario autenticado."
+      );
+    }
+
+    const apiKey = openaiApiKey.value();
+    if (!apiKey) {
+      console.error("ERROR: OPENAI_API_KEY no está configurada");
+      throw new HttpsError(
+        "internal",
+        "La clave API de OpenAI no está configurada."
+      );
+    }
+    const battleAssistantId = openaiBattleAssistantId.value();
+    if (!battleAssistantId) {
+      console.error("ERROR: OPENAI_BATTLE_ASSISTANT_ID no está configurado");
+      throw new HttpsError(
+        "internal",
+        "El ID del asistente Battle no está configurado."
+      );
+    }
+
+    // Parámetros opcionales para personalizar la generación
+    const { difficulty = "normal", categories = [] } = request.data || {};
+
+    const openai = new OpenAI({ apiKey });
+
+    try {
+      console.log("[Battle] Creando thread...");
+      const thread = await openai.beta.threads.create();
+      if (!thread?.id) {
+        throw new HttpsError(
+          "internal",
+          "No se pudo crear el hilo de conversación para Battle."
+        );
+      }
+
+      // Construimos el prompt para el asistente
+      const promptContent = JSON.stringify({
+        action: "GENERATE_BATTLE_CHALLENGE",
+        difficulty,
+        categories,
+      });
+
+      console.log("[Battle] Añadiendo mensaje al thread...");
+      await openai.beta.threads.messages.create(thread.id, {
+        role: "user",
+        content: promptContent,
+      });
+
+      console.log("[Battle] Iniciando run con asistente Battle...");
+      let run = await openai.beta.threads.runs.create(thread.id, {
+        assistant_id: battleAssistantId,
+      });
+
+      // Esperamos a que el asistente complete la respuesta (polling sencillo)
+      const maxLoops = 60;
+      let loops = 0;
+      while ((run.status === "queued" || run.status === "in_progress") && loops < maxLoops) {
+        await new Promise((res) => setTimeout(res, 1500));
+        run = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+        loops++;
+      }
+
+      if (run.status !== "completed") {
+        throw new HttpsError(
+          "internal",
+          `La ejecución del asistente Battle no se completó. Estado: ${run.status}`
+        );
+      }
+
+      console.log("[Battle] Obteniendo mensajes del asistente...");
+      const messages = await openai.beta.threads.messages.list(thread.id);
+      const assistantMessage = messages.data.find((m) => m.role === "assistant");
+      const textResponse = assistantMessage?.content?.[0]?.text?.value;
+      if (!textResponse) {
+        throw new HttpsError(
+          "internal",
+          "La respuesta del asistente Battle estaba vacía o en formato inesperado."
+        );
+      }
+
+      try {
+        const challenge = JSON.parse(textResponse);
+        console.log("[Battle] Reto Battle generado:", challenge);
+        return challenge;
+      } catch (e) {
+        console.error("[Battle] Error parseando respuesta:", e, textResponse);
+        throw new HttpsError(
+          "internal",
+          "La respuesta del asistente Battle no era un JSON válido."
+        );
+      }
+    } catch (error) {
+      if (error instanceof HttpsError) throw error;
+      console.error("[Battle] Error general:", error);
+      throw new HttpsError(
+        "internal",
+        `Error generando reto Battle: ${error.message}`
+      );
     }
   }
 );
