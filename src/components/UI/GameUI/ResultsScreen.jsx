@@ -178,29 +178,16 @@ const ResultsScreen = (props) => {
               <TrophyIcon size={80} color={COLORS.primary} />
               <Text style={styles.celebrationTitle}>¡Partida Finalizada!</Text>
             </View>
-            {/* Ganador destacado */}
+            
+            {/* Resultado del jugador */}
             <View style={styles.winnerCard}>
-              <View style={styles.winnerHeader}>
-                <TrophyIcon size={32} color={COLORS.primary} />
-                <Text style={styles.winnerLabel}>GANADOR</Text>
-              </View>
               <Text style={styles.winnerName}>{winner?.name || winner?.nombre}</Text>
               <View style={styles.winnerScoreContainer}>
                 <FireIcon size={24} color={COLORS.primary} />
                 <Text style={styles.winnerScore}>{winnerScore} puntos</Text>
               </View>
             </View>
-            {/* Scoreboard */}
-            <View>
-              {sortedPlayers.map((player, idx) => (
-                <View key={player.uid || player.name || idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                  <Text style={{ fontWeight: 'bold', color: idx === 0 ? COLORS.primary : COLORS.darkBlue, width: 32 }}>{idx + 1}.</Text>
-                  <Text style={{ flex: 1 }}>{player.name || player.nombre}</Text>
-                  <Text style={{ fontWeight: 'bold', color: COLORS.blue }}>{player.score ?? player.magnetos ?? 0}</Text>
-                  <FireIcon size={16} color={COLORS.blue} style={{ marginLeft: 4 }} />
-                </View>
-              ))}
-            </View>
+
           </View>
           {/* Botón de regreso */}
           <View style={styles.buttonContainer}>
@@ -282,15 +269,11 @@ const ResultsScreen = (props) => {
               <StarIcon size={20} color={COLORS.blue} />
             </View>
           </Animated.View>
-          {/* Ganador destacado */}
+          {/* Resultado del jugador */}
           <Animated.View style={[
             styles.winnerCard,
             { transform: [{ scale: scaleAnim }] }
           ]}>
-            <View style={styles.winnerHeader}>
-              <TrophyIcon size={32} color={COLORS.primary} />
-              <Text style={styles.winnerLabel}>GANADOR</Text>
-            </View>
             <Text style={styles.winnerName}>{winner.nombre}</Text>
             <View style={styles.winnerScoreContainer}>
               <FireIcon size={24} color={COLORS.primary} />
@@ -401,21 +384,6 @@ const styles = StyleSheet.create({
         elevation: 8,
       },
     }),
-  },
-
-  winnerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-  },
-
-  winnerLabel: {
-    fontFamily: FONTS.title,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-    letterSpacing: 2,
   },
 
   winnerName: {

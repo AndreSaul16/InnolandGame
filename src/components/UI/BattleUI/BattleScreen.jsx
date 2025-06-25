@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback, useContext } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, StatusBar, Platform } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, StatusBar, Platform, Alert, Modal } from 'react-native';
 import OpenAIService from '../../../services/OpenAIService';
 import { COLORS, FONTS } from '../../../theme';
 import { useNavigation } from '@react-navigation/native';
 import ScoreBoard from '../GameUI/ScoreBoard';
 import { UserContext } from '../../../context/UserContext';
+import LoadingScreen from '../../../utils/LoadingScreen';
+import { addMagnetosToUser, saveBattleModeState } from '../../../services/FirebaseDataService';
 
 // Componente de estilos CSS para web
 const WebStyles = () => {
@@ -21,8 +23,7 @@ const WebStyles = () => {
           -webkit-overflow-scrolling: touch;
           scrollbar-width: thin;
           scrollbar-color: ${COLORS.primary}40 transparent;
-          height: 100vh !important;
-          max-height: 100vh !important;
+          flex: 1; /* Ocupar el espacio del contenedor padre */
         }
         
         .battle-scroll::-webkit-scrollbar {
@@ -167,18 +168,19 @@ const WebStyles = () => {
  * dos preguntas en la cola. Al responder una, avanza a la siguiente y solicita
  * una nueva para re-llenar la cola. El jugador acumula puntos por respuestas correctas.
  */
-const INITIAL_QUEUE_SIZE = 2;
+const INITIAL_QUEUE_SIZE = 6;
+const MIN_QUEUE_SIZE = 6;
 
 export default function BattleScreen() {
   const navigation = useNavigation();
-  const { user } = useContext(UserContext);
-  
-  // --- Estado del jugador ---
+  const { user, battleState, setBattleState } = useContext(UserContext);
+
+  // --- Estado del jugador (ahora persistente) ---
   const [player, setPlayer] = useState({
     name: user?.nombre || user?.username || user?.email || 'Jugador',
     score: 0
   });
-  
+
   // --- Estado de preguntas ---
   const [questionQueue, setQuestionQueue] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -186,40 +188,104 @@ export default function BattleScreen() {
   const [selectedOption, setSelectedOption] = useState(null);
   const [isCorrect, setIsCorrect] = useState(null);
   const [feedback, setFeedback] = useState('');
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
 
-  // --- Inicialización de preguntas ---
+  // --- Loader para siguiente pregunta ---
+  const [waitingNextQuestion, setWaitingNextQuestion] = useState(false);
 
-  // --- Preguntas ---
+  // --- Restaurar estado de batalla desde el contexto ---
+  useEffect(() => {
+    console.log('[BattleScreen] useEffect[battleState]: battleState =', battleState);
+    if (battleState) {
+      // FIX: Si el array de preguntas está vacío, forzar nueva partida
+      if (!Array.isArray(battleState.questionQueue) || battleState.questionQueue.length === 0) {
+        console.warn('[BattleScreen] ADVERTENCIA: battleState restaurado con questionQueue vacío. Se fuerza nueva partida.');
+        setBattleState(null);
+        initializeNewBattle();
+        return;
+      }
+      setShowRestoreModal(true);
+    } else {
+      initializeNewBattle();
+    }
+  }, [battleState]);
+
+  // Nueva función para guardar el estado inicial de la batalla
+  const saveInitialBattleState = useCallback((initialQuestions) => {
+    const initialState = {
+      player: {
+        name: user?.nombre || user?.username || user?.email || 'Jugador',
+        score: 0
+      },
+      questionQueue: initialQuestions,
+      currentIndex: 0,
+      lastUpdated: Date.now()
+    };
+    setBattleState(initialState);
+    // Guardar explícitamente en Firebase si es nativo
+    if (Platform.OS !== 'web' && user && user.uid) {
+      saveBattleModeState(user.uid, initialState);
+      console.log('[BattleScreen] Estado inicial de batalla guardado en Firebase:', initialState);
+    }
+    console.log('[BattleScreen] Estado inicial de batalla guardado:', initialState);
+  }, [user, setBattleState]);
+
+  const initializeNewBattle = useCallback(async () => {
+    setIsLoading(true);
+    console.log('[BattleScreen] initializeNewBattle: Iniciando nueva partida, generando preguntas...');
+    try {
+      const promises = Array.from({ length: INITIAL_QUEUE_SIZE }).map((_, idx) => {
+        console.log(`[BattleScreen] Solicitando pregunta inicial #${idx + 1}`);
+        return OpenAIService.generateBattleChallenge();
+      });
+      const initialQuestions = await Promise.all(promises);
+      console.log('[BattleScreen] Preguntas iniciales generadas:', initialQuestions);
+      setQuestionQueue(initialQuestions);
+      setPlayer({
+        name: user?.nombre || user?.username || user?.email || 'Jugador',
+        score: 0
+      });
+      setCurrentIndex(0);
+      // Guardar el estado inicial de la batalla
+      saveInitialBattleState(initialQuestions);
+    } catch (error) {
+      console.error('[BattleScreen] Error cargando preguntas iniciales:', error);
+    } finally {
+      setIsLoading(false);
+      console.log('[BattleScreen] initializeNewBattle: setIsLoading(false)');
+    }
+  }, [user, saveInitialBattleState]);
+
   const fetchAndAppendQuestion = useCallback(async () => {
     try {
+      console.log('[BattleScreen] fetchAndAppendQuestion: solicitando nueva pregunta...');
       const newChallenge = await OpenAIService.generateBattleChallenge();
+      console.log('[BattleScreen] Nueva pregunta generada:', newChallenge);
       setQuestionQueue((prev) => [...prev, newChallenge]);
     } catch (err) {
       console.error('[BattleScreen] Error generando nuevo reto:', err);
     }
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
+  // Pre-carga preguntas en background si la cola baja de 6
+  const ensureQuestionQueue = useCallback(async () => {
+    if (questionQueue.length < MIN_QUEUE_SIZE) {
+      const toFetch = MIN_QUEUE_SIZE - questionQueue.length;
       try {
-        const promises = Array.from({ length: INITIAL_QUEUE_SIZE }).map(() =>
-          OpenAIService.generateBattleChallenge()
+        const newQuestions = await Promise.all(
+          Array.from({ length: toFetch }).map(() => OpenAIService.generateBattleChallenge())
         );
-        const initialQuestions = await Promise.all(promises);
-        setQuestionQueue(initialQuestions);
-      } catch (error) {
-        console.error('[BattleScreen] Error cargando preguntas iniciales:', error);
-      } finally {
-        setIsLoading(false);
+        setQuestionQueue((prev) => [...prev, ...newQuestions]);
+        console.log(`[BattleScreen] Precargadas ${newQuestions.length} preguntas para mantener la cola`);
+      } catch (err) {
+        console.error('[BattleScreen] Error precargando preguntas:', err);
       }
-    })();
-  }, []);
+    }
+  }, [questionQueue.length]);
 
-  // --- Selección de respuesta ---
-  const handleOptionPress = (optionIdx) => {
+  // Al responder, avanza y precarga si es necesario, sin loader si hay preguntas
+  const handleOptionPress = async (optionIdx) => {
     if (selectedOption !== null) return;
-    
     setSelectedOption(optionIdx);
     const currentQuestion = questionQueue[currentIndex];
     const correctIdx = typeof currentQuestion.correctAnswer === 'number'
@@ -230,42 +296,85 @@ export default function BattleScreen() {
     const wasCorrect = optionIdx === correctIdx;
     setIsCorrect(wasCorrect);
     setFeedback(currentQuestion.explanation || (wasCorrect ? '¡Respuesta correcta!' : 'Respuesta incorrecta'));
-    
-    // Actualizar puntuación del jugador
-    if (wasCorrect) {
-      setPlayer(prev => ({ ...prev, score: prev.score + 1 }));
-    }
-    
-    // Precargar siguiente pregunta
-    fetchAndAppendQuestion();
+    setPlayer(prev => ({ ...prev, score: wasCorrect ? prev.score + 1 : prev.score - 1 }));
+    // Pre-carga en background si hace falta
+    ensureQuestionQueue();
+    console.log('[BattleScreen] handleOptionPress: opción seleccionada', { optionIdx, wasCorrect, currentQuestion });
   };
+
+  useEffect(() => {
+    console.log('[BattleScreen] useEffect[player, questionQueue, currentIndex, isLoading]:', { player, questionQueue, currentIndex, isLoading });
+    if (!isLoading && questionQueue.length > 0 && player.score >= 0) {
+      const currentBattleState = {
+        player,
+        questionQueue,
+        currentIndex,
+        lastUpdated: Date.now()
+      };
+      setBattleState(currentBattleState);
+      console.log('[BattleScreen] Estado de batalla guardado en contexto:', currentBattleState);
+    }
+  }, [player, questionQueue, currentIndex, isLoading]);
 
   const handleNextQuestion = () => {
     setSelectedOption(null);
     setIsCorrect(null);
     setFeedback('');
     setCurrentIndex((prev) => prev + 1);
+    console.log('[BattleScreen] handleNextQuestion: avanzando a la siguiente pregunta');
   };
 
-  // --- Finalizar partida ---
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    setBattleState(null);
+    // Sumar/restar magnetos al usuario (score final, puede ser negativo)
+    if (user && user.uid && player && typeof player.score === 'number' && player.score !== 0) {
+      try {
+        await addMagnetosToUser(user.uid, player.score);
+        console.log(`[BattleScreen] Magnetos sumados al usuario: ${player.score > 0 ? '+' : ''}${player.score}`);
+      } catch (e) {
+        console.error('[BattleScreen] Error al sumar/restar magnetos al usuario:', e);
+      }
+    }
     navigation.replace('ResultsScreen', {
       players: [player],
       mode: 'battle',
       gameType: 'battle'
     });
+    console.log('[BattleScreen] handleFinish: partida finalizada, score =', player.score);
   };
 
-
+  const handleExitBattle = () => {
+    Alert.alert(
+      'Abandonar Partida',
+      `¿Estás seguro que quieres abandonar? Perderás tu progreso actual (${player.score} magnetos).`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {
+          text: 'Abandonar',
+          style: 'destructive',
+          onPress: () => {
+            setBattleState(null);
+            navigation.replace('Home', { user });
+            console.log('[BattleScreen] handleExitBattle: usuario abandona la partida');
+          }
+        }
+      ]
+    );
+  };
 
   // --- Render principal ---
+  // Loader solo si no hay preguntas
   if (isLoading || questionQueue.length === 0) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Cargando preguntas del modo Battle...</Text>
-      </View>
+      <LoadingScreen message="Cargando preguntas del modo Battle..." />
     );
+  }
+
+  if (waitingNextQuestion) {
+    return <LoadingScreen message="Cargando siguiente pregunta..." />;
   }
 
   const currentQuestion = questionQueue[currentIndex];
@@ -350,15 +459,6 @@ export default function BattleScreen() {
             )}
           </View>
           
-          {/* Espacio adicional para testing del scroll */}
-          {Platform.OS === 'web' && (
-            <View style={{ height: 300, backgroundColor: 'transparent' }}>
-              <Text style={{ textAlign: 'center', color: COLORS.gray, opacity: 0.5, marginTop: 100 }}>
-                Área de scroll - puedes hacer scroll hacia abajo
-              </Text>
-            </View>
-          )}
-          
           {/* Botón de finalizar dentro del ScrollView para evitar problemas de posicionamiento */}
           <TouchableOpacity 
             style={styles.finishButton} 
@@ -378,15 +478,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
+    ...Platform.select({
+      web: {
+        height: '100vh',
+        maxHeight: '100vh',
+        overflow: 'hidden', // Evita que el body tenga scroll
+      }
+    })
   },
   scrollView: {
     flex: 1,
   },
   scrollViewWeb: Platform.OS === 'web' ? {
-    // Estilos básicos para web, los avanzados están en el CSS
-    overflow: 'auto',
-    WebkitOverflowScrolling: 'touch',
-    overscrollBehavior: 'contain',
+    // Los estilos de scrollbar y overflow se manejan en la clase CSS
+    // para mayor especificidad.
   } : {},
   scrollContent: {
     flexGrow: 1,
@@ -394,7 +499,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40, // Espacio extra al final para el botón
   },
   scrollContentWeb: Platform.OS === 'web' ? {
-    minHeight: 'calc(100vh + 200px)', // Forzar que sea más alto que la ventana
+    minHeight: 'calc(100vh + 1px)', // Garantiza que siempre haya scroll
     paddingTop: 20,
     paddingBottom: 60,
   } : {},
@@ -551,4 +656,4 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 
-}); 
+});

@@ -555,4 +555,26 @@ export const getUserActiveRoom = async (uid) => {
   return null;
 };
 
+// Guarda el estado de la partida Battle Royale para un usuario
+export const saveBattleModeState = async (uid, battleState) => {
+  const battleRef = ref(database, `battleMode/${uid}`);
+  await set(battleRef, {
+    ...battleState,
+    updatedAt: new Date().toISOString(),
+  });
+};
+
+// Recupera el estado de la partida Battle Royale de un usuario
+export const getBattleModeState = async (uid) => {
+  const battleRef = ref(database, `battleMode/${uid}`);
+  const snapshot = await get(battleRef);
+  return snapshot.exists() ? snapshot.val() : null;
+};
+
+// Elimina el estado de la partida Battle Royale de un usuario (al terminar o abandonar)
+export const deleteBattleModeState = async (uid) => {
+  const battleRef = ref(database, `battleMode/${uid}`);
+  await remove(battleRef);
+};
+
 export { app, storage, auth };
